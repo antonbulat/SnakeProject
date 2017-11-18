@@ -1,0 +1,117 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University/School Laboratory Report
+% LaTeX Template
+% Version 3.1 (25/3/14)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Linux and Unix Users Group at Virginia Tech Wiki 
+% (https://vtluug.org/wiki/Example_LaTeX_chem_lab_report)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+%\usepackage{algorithm}
+%\usepackage[noend]{algpseudocode}
+
+
+%\usepackage[version=3]{mhchem} % Package for chemical equation typesetting
+%\usepackage{siunitx} % Provides the \SI{}{} and \si{} command for typesetting SI units
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage{natbib} % Required to change bibliography style to APA
+\usepackage{amsmath} % Required for some math elements 
+
+\usepackage{amssymb}
+
+\usepackage{listings}
+\lstset{numbers=left, numberstyle=\tiny, numbersep=5pt}
+\lstset{language=bash}
+
+\setlength\parindent{10pt} % Removes all indentation from paragraphs
+
+\renewcommand{\labelenumi}{\alph{enumi}.} % Make numbering in the enumerate environment by letter rather than number (e.g. section 6)
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+%\title{\textsc{Big Data} \\ \textsc{Sheet 05} } % Title
+\title{Big Data \"Ubungsblatt 05}
+\author{Anton Bulat, Josephine Geiger, Julia Siekiera} % Author name
+
+
+\date{\today} % Date for the report
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+
+\section*{Aufgabe 1: Monoide}
+
+\subsection*{a)}
+Handelt es sich im Folgenden um Monoide?\\
+Ein Monoid ist eine Halbgruppe mit Einselement, also ein Tripel $(G, \circ, e)$ aus:
+\begin{enumerate}
+\item[-] Menge $G$
+\item[-] assoziativer Verkn\"upfung $\circ: G \times G \rightarrow G$
+\item[-] Einselement $e \in G$
+\end{enumerate}
+\subsubsection*{i)}
+Das Kreuzprodukt von Vektoren aus $\mathbb{R}^3$ ist kein Monoid, da die Verkn\"upfung des Kreuzproduktes nicht assoziativ ist.\\
+Gegenbeispiel: Sei $e_i$ der $i$-te Einheitsvektor.
+$$(e_1 \times e_1) \times e_2 = 0, \qquad e_1 \times(e_1 \times e_2) = -e_2.$$
+\subsubsection*{ii)}
+Die Addition von Matrizen aus $\mathbb{R}^{m\times n}$ mit $m \neq n$ ist ein Monoid mit dem Tripel $(\mathbb{R}^{m \times n}, +, 0_{mn})$, wobei $+$ die elementweise Addition ist und damit assoziativ und $0_{mn}$ die Nullmatrix ist. Addiert man zwei Elemente aus $\mathbb{R}^{m\times n}$, so ergibt sich ein Element, das ebenfalls in $\mathbb{R}^{m\times n}$ liegt.
+\subsubsection*{iii)}
+Die Bestimmung des gr\"o\ss ten gemeinsamen Teilers ganzer Zahlen ist ein Monoid mit dem Tripel $(\mathbb{Z}, ggT, 0)$, wobei die Verkn\"upfung ggT die Bestimmung des gr\"o\ss ten gemeinsamen Teilers sein soll mit dem geltenden Assoziativgesetz: $$ggT(a,b,c) = ggT(ggT(a,b),c) = ggT(a,ggT(b,c)).$$
+Die $0$ ist hier das Einselement, da der $ggT(a,0)=a\quad \forall a \in \mathbb{Z}$.
+\subsubsection*{iv)}
+Die bin\"are XOR-Verkn\"upfung Boolscher Werte ist ein Monoid mit dem Tripel $(\{False, True\}, XOR, False)$, wobei die XOR-Verkn\"upfung assoziativ ist wie in der Tabelle gezeigt (mit False $\hat{= }\ 0$, True $\hat{= }\ 1$):
+$$
+\begin{tabular}{ccccc}
+A & B & C & (A XOR B) XOR C & A XOR (B XOR C)\\
+0 & 0 & 0 & 0 & 0\\
+0 & 0 & 1 & 1 & 1\\
+0 & 1 & 0 & 1 & 1\\
+0 & 1 & 1 & 0 & 0\\
+1 & 0 & 0 & 1 & 1\\
+1 & 0 & 1 & 0 & 0\\
+1 & 1 & 0 & 0 & 0\\
+1 & 1 & 1 & 1 & 1
+\end{tabular}
+$$
+
+Eine \"aquivalente, mathematischere Formulierung f\"ur die XOR-Verkn\"upfung ist das Tripel $(\mathbb{Z}/2\mathbb{Z},+,0)$, wobei $\mathbb{Z}/2\mathbb{Z}$ isomorph ist zu der Menge \{True, False\}. Die Verkn\"upfung $+$ entspricht der Addition auf $\mathbb{Z}/2\mathbb{Z}$ und liefert dadurch auch die Assoziativit\"at, und das Einselement ist hier die $0 \in \mathbb{Z}/2\mathbb{Z}$.
+\subsubsection*{v)}
+Die Vereinigung von Mengen ist ein Monoid mit dem Tripel $(\mathcal{P}(X), \cup, \emptyset)$, wobei $\mathcal{P}(X)$ die Potenzmenge einer Menge $X$ ist und $\cup$ die Vereinigungsverkn\"upfung darstellt, die nach Definition assoziativ ist. Das Einselement ist hier die leere Menge, da $A \cup \emptyset = A\quad\forall A \subseteq X$. Vereinigt man zwei Elemente aus $\mathcal{P}(X)$, so ergibt sich ein Element, das ebenfalls in $\mathcal{P}(X)$ liegt.
+
+
+\subsection*{b)}
+\subsubsection*{i)}
+Welche Form haben die Eingaben der Map- und Reduceschritte?\\
+Die Eingabe des Mappers ist $(k,v)$-Tupel mit $k$ als String und $v$ als Integer. Sie bildet ein Monoid bez\"uglich der Konkatenation.\\
+Die Eingabe des Reducers ist von der Form $(k,l=[v_1,\dots,v_n])$, also vom Typ $Map<String,List<Integer>>$ und ist ebenfalls ein Monoid bez\"uglich der Konkatenation mit dem Tripel $(Map<String,List<Integer>>,\otimes,\epsilon)$.\\
+Welche Form hat die Ausgabe?\\
+Die Ausgabe ist vom Typ $Map<String,Integer>$ und hat die Monoidstruktur mit dem Tripel $(Map<String, Integer>, \otimes, \epsilon)$.
+\newpage
+\subsubsection*{ii)}
+Reduce ist ein Monoid-Homomorphismus und kann also als Combiner verwendet werden.\\
+\textbf{Denn: } Die Eingabe f\"ur den Reducer sind $(k,l)$-Paare. Reduce summiert alle $l$-Werte f\"ur alle Schl\"ussel auf.\\
+Bei einer Aufteilung der Reduce-Eingabe in zwei St\"ucke
+($(k, l_{\textit{first}})$- und $(k,l_{\textit{second}})$-Paare, $l=l_{\textit{first}}+l_{\textit{second}}$)
+summiert Reduce $l_{\textit{first}}$ und $l_{\textit{second}}$ einzeln und erh\"alt $l$, da die Summe der beiden Teilsummen die ganze Summe ergeben. 
+
+
+\end{document}
