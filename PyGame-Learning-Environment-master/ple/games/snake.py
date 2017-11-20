@@ -234,12 +234,14 @@ class Snake(PyGameWrapper):
 
         PyGameWrapper.__init__(self, width, height, actions=actions)
 
-        self.speed = percent_round_int(width, 0.45)
+        self.speed = percent_round_int(width, 0.1)
 
-        self.player_width = percent_round_int(width, 0.05)
-        self.food_width = percent_round_int(width, 0.09)
+        self.player_width = percent_round_int(width, 0.2)
+        self.food_width = percent_round_int(width, 0.1)
         self.player_color = (100, 255, 100)
         self.food_color = (255, 100, 100)
+        # self.food_color = (0, 0, 0)
+
 
         self.INIT_POS = (width / 2, height / 2)
         self.init_length = init_length
