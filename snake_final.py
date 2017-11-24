@@ -2,20 +2,23 @@ import ple.games as game
 import numpy.random as num
 import pickle as pic
 import os
-#import psutil
 import time
 import matplotlib.pyplot as plt
 from ple import PLE
 
 # naive hash function for the screen
-def my_hash(screen):
-    return hash(str(screen))
+def my_hash(value):
+    return hash(str(value))
 
 
 class MyAgent(object):
     def __init__(self, actionset):
         self.actionset = actionset
         self.wantDebug = True
+        if self.wantDebug:
+
+            for i in range(0, len(actionset)):
+                print("Action number: " + str(i) + " " + str(actionset[i]))
 
     def pickRandomAction(self):
         #actions -> "up": K_w, "left": K_a, "right": K_d, "down": K_s, "none": -
@@ -31,7 +34,8 @@ class MyAgent(object):
             else:
                 max_action = self.pickRandomAction()  # take a random action
                 p.act(max_action)  # execute action
-        scores.append(snake.getScore())
+            if nb_frames_test == f and not p.game_over():
+                scores.append(snake.getScore())
         return scores
 
     def test(self, q_dic, p, snake, nb_frames_test):
@@ -40,7 +44,7 @@ class MyAgent(object):
         temp_state = snake.getGameState()
         temp_state["food_x"] = 0
         temp_state["food_y"] = 0
-        current_state = str(temp_state)
+        current_state = hash(str(temp_state))
         for f in range(nb_frames_test):
             if p.game_over():
                 scores.append(snake.getScore() + 5)  # save the scores
@@ -61,20 +65,20 @@ class MyAgent(object):
 
                 p.act(max_action)  # execute action
 
-                temp_state = snake.getGameState()
-                temp_state["food_x"] = 0
-                temp_state["food_y"] = 0
-                current_state = str(temp_state)
+            temp_state = snake.getGameState()
+            temp_state["food_x"] = 0
+            temp_state["food_y"] = 0
+            current_state = hash(str(temp_state))
 
         return scores
 
-    def getSmartReward(self, current_state, next_state, reward):
+    def getSmartReward(self, current_state_snake, next_state_snake, reward):
         if reward == -5:  # game over
             return -5
         elif reward == 1:  # Snake found apple
             return 4
         else:
-            if self.foodIsNearer(current_state, next_state):  # snake goes to apple
+            if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
                 return 1
             return -1  # snake goes away from apple
 
@@ -110,9 +114,9 @@ class MyAgent(object):
 
         current_state_snake = snake.getGameState()
         current_state_snake_manipulated = snake.getGameState()
-        current_state_snake_manipulated["food_x"]=0
+        current_state_snake_manipulated["food_x"]= 0
         current_state_snake_manipulated["food_y"] = 0
-        current_state = str(current_state_snake_manipulated)
+        current_state = hash(str(current_state_snake_manipulated))
 
         if self.wantDebug:
             print("Start state: " + str(current_state_snake))
@@ -122,10 +126,12 @@ class MyAgent(object):
         action = self.pickRandomAction()  # select a random action
         for f in range(nb_frames):
             if p.game_over():
+                if self.wantDebug:
+                    print("-------ITERATION " + str(f) +"-------")
                 p.reset_game()
                 games_played_count += 1
                 if self.wantDebug:
-                    print("Game over! Reset Game")
+                    print("Game over! Reset Game! Start game number: " + str(games_played_count))
             # //////////////////////////////////////////////////////////////////////////////////////////
             else:
                 if self.wantDebug:
@@ -138,8 +144,8 @@ class MyAgent(object):
                 next_state_snake_manipulated = snake.getGameState()
                 next_state_snake_manipulated["food_x"] = 0
                 next_state_snake_manipulated["food_y"] = 0
-                next_state = str(next_state_snake_manipulated)
-                smartReward = self.getSmartReward( current_state_snake, next_state_snake, reward)
+                next_state = hash(str(next_state_snake_manipulated))
+                smartReward = self.getSmartReward(current_state_snake, next_state_snake, reward)
 
                 if self.wantDebug:
                     print("Current state hash: " + str(current_state))
@@ -150,9 +156,8 @@ class MyAgent(object):
                 if ((current_state, action) not in q_dic):  # if current state is not in the dictionary
                     state_add_count += 1
                     q_dic[(current_state, action)] = 0.0  # add initial value
-                else:
-                    if self.wantDebug:
-                        print("Aktual value of the current state and action: " + str(q_dic[(current_state, action)]))
+                if self.wantDebug:
+                    print("Actual value of the current state and action: " + str(q_dic[(current_state, action)]))
 
                 # find action with maximal q value:
                 max_action = self.pickRandomAction()  # first take a random action
@@ -161,7 +166,7 @@ class MyAgent(object):
                     max = q_dic[(next_state, max_action)]
                 else:
                     q_dic[(next_state, max_action)] = 0.0
-                # look if the is an other action in actionset which is better (based on q table)
+                # look if there is an other action in actionset which is better (based on q table)
                 for a in self.actionset:
                     if (next_state, a) in q_dic:
                         tmp = q_dic[(next_state, a)]
@@ -173,7 +178,7 @@ class MyAgent(object):
 
                 #We are using SmartReward. This means we use the information of the snake and food position for the reward function.
                 tempvar = q_dic[(current_state, action)]
-                q_dic[(current_state, action)] += learner * (smartReward + gamma * q_dic[(next_state, max_action)]- q_dic[(current_state, action)])
+                q_dic[(current_state, action)] += learner * (smartReward + gamma * q_dic[(next_state, max_action)] - q_dic[(current_state, action)])
 
                 if tempvar != q_dic[(current_state, action)]:
                     state_update_count += 1
@@ -195,14 +200,10 @@ class MyAgent(object):
 
                 if self.wantDebug:
                     print("New action: " + str(action))
-                #print("States added: " + str(state_add_count))
-                #print("States updated: " + str(state_update_count))
                 #time.sleep(1)
 
         if self.wantDebug:
             for val in q_dic:
-                #print(str(val))
-                #print(">>>" + str(q_dic[val]))
                 if q_dic[val]==0:
                     zeros_in_q_dict += 1
                 else:
@@ -246,25 +247,35 @@ myAgent = MyAgent(p.getActionSet())
 # plt.hist(learned_scores, color='green')
 # plt.show()
 
-gamma = 0.5
-learner = 0.7
-explored = 0.4
+dic = {}
+gamma = 0.75
+learner = 0.75
+explored = 0.1
+frames = 100000
 
-out_file = open(os.getcwd() + '/q_dic600000.pkl', 'wb')
-infile = open(os.getcwd() + '/q_dic500000.pkl', 'rb')
-dic = pic.load(infile)
+#out_file = open(os.getcwd() + '\q_dic600000.pkl', 'wb')
+#infile = open(os.getcwd() + '\q_dic500000.pkl', 'rb')
+#dic = pic.load(infile)
 
-my_q_dic = myAgent.train(p, snake, 100000, gamma, learner, explored, dic)
+my_q_dic = myAgent.train(p, snake, frames, gamma, learner, explored, dic)
 
-pic.dump(my_q_dic, out_file)
-out_file.close()
-infile.close()
-learned_scores = myAgent.test(my_q_dic, p, snake, 100000)
+# save the q-dic in a file
+afile = open(os.getcwd() + '\q_dic.pkl', 'wb')
+pic.dump(my_q_dic, afile)
+afile.close()
+
+# pic.dump(my_q_dic, out_file)
+# out_file.close()
+# infile.close()
+random_scores = myAgent.test_random(p, snake, frames)
+learned_scores = myAgent.test(my_q_dic, p, snake, frames)
 
 title = "Configuration: gamma: " + str(gamma) + " ,learning_rate: " \
-        + str(learner) + " ,explored: " + str(explored) + " Num of train rounds: 600000"
+        + str(learner) + " ,explored: " + str(explored) + " Num of train rounds: 100000"
 plt.title(title)
 plt.ylabel("Number of games")
 plt.xlabel("Number of apples")
 plt.hist(learned_scores, color='green')
+plt.hist(random_scores, color='red')
 plt.show()
+
