@@ -15,7 +15,7 @@ def my_hash(screen):
 class MyAgent(object):
     def __init__(self, actionset):
         self.actionset = actionset
-        self.nb_frames = 300000
+        self.nb_frames = 100000
         self.wantDebug = True
 
     def pickRandomAction(self):
@@ -33,7 +33,8 @@ class MyAgent(object):
             else:
                 max_action = self.pickRandomAction()  # take a random action
                 p.act(max_action)  # execute action
-        scores.append(snake.getScore() + 5)
+
+        scores.append(snake.getScore())
         return scores
 
     def test(self, q_dic, p, snake):
@@ -224,8 +225,8 @@ class MyAgent(object):
 snake = game.Snake(width=100,height=100)
 #snake = game.Snake()
 
-#p = PLE(snake, fps=30, display_screen=False)
-p = PLE(snake, fps=10, display_screen=True)
+p = PLE(snake, fps=30, display_screen=False)
+#p = PLE(snake, fps=10, display_screen=True)
 
 myAgent = MyAgent(p.getActionSet())
 
