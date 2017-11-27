@@ -93,6 +93,17 @@ class MyAgent(object):
                 print("Movement in wrong direction")
             return False
 
+    def calculateHash(self, state):
+        hc = 17
+        hashMultiplier = 59
+        myTuple = (state["snake_head_x"], state["snake_head_y"], state["food_x"], state["food_y"])
+        for val in state["snake_body_pos"]:
+            tempTuple = (val[0], val[1])
+            myTuple += tempTuple
+
+        hc = hash(myTuple)
+        return hc
+
     # Q-Leaning Algorithm
     # returns a q-dictionary
     def train(self, p, snake, nb_frames, gamma, learner, explored, dic):
@@ -114,9 +125,9 @@ class MyAgent(object):
 
         current_state_snake = snake.getGameState()
         current_state_snake_manipulated = snake.getGameState()
-        current_state_snake_manipulated["food_x"]= 0
-        current_state_snake_manipulated["food_y"] = 0
-        current_state = hash(str(current_state_snake_manipulated))
+        #current_state_snake_manipulated["food_x"]= 0
+        #current_state_snake_manipulated["food_y"] = 0
+        current_state = self.calculateHash(current_state_snake_manipulated)
 
         if self.wantDebug:
             print("Start state: " + str(current_state_snake))
@@ -142,9 +153,10 @@ class MyAgent(object):
                 #For reward value calculation we use the positioning of the food. But not for the Q table. We want to reduce the number of states
                 next_state_snake = snake.getGameState()
                 next_state_snake_manipulated = snake.getGameState()
-                next_state_snake_manipulated["food_x"] = 0
-                next_state_snake_manipulated["food_y"] = 0
-                next_state = hash(str(next_state_snake_manipulated))
+                #next_state_snake_manipulated["food_x"] = 0
+                #next_state_snake_manipulated["food_y"] = 0
+                next_state = self.calculateHash(next_state_snake_manipulated)
+
                 smartReward = self.getSmartReward(current_state_snake, next_state_snake, reward)
 
                 if self.wantDebug:
@@ -248,10 +260,10 @@ myAgent = MyAgent(p.getActionSet())
 # plt.show()
 
 dic = {}
-gamma = 0.75
-learner = 0.75
-explored = 0.1
-frames = 100000
+gamma = 0.5
+learner = 0.5
+explored = 0.2
+frames = 1000000
 
 #out_file = open(os.getcwd() + '\q_dic600000.pkl', 'wb')
 #infile = open(os.getcwd() + '\q_dic500000.pkl', 'rb')
@@ -271,7 +283,7 @@ random_scores = myAgent.test_random(p, snake, frames)
 learned_scores = myAgent.test(my_q_dic, p, snake, frames)
 
 title = "Configuration: gamma: " + str(gamma) + " ,learning_rate: " \
-        + str(learner) + " ,explored: " + str(explored) + " Num of train rounds: 100000"
+        + str(learner) + " ,explored: " + str(explored) + " Num of train rounds: " + str(frames)
 plt.title(title)
 plt.ylabel("Number of games")
 plt.xlabel("Number of apples")
