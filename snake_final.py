@@ -212,7 +212,7 @@ class MyAgent(object):
 
                 if self.wantDebug:
                     print("New action: " + str(action))
-                #time.sleep(1)
+                time.sleep(1)
 
         if self.wantDebug:
             for val in q_dic:
@@ -263,7 +263,7 @@ dic = {}
 gamma = 0.5
 learner = 0.5
 explored = 0.2
-frames = 1000000
+frames = 1000
 
 #out_file = open(os.getcwd() + '\q_dic600000.pkl', 'wb')
 #infile = open(os.getcwd() + '\q_dic500000.pkl', 'rb')
