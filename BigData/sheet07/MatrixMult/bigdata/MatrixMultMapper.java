@@ -36,6 +36,7 @@ public class MatrixMultMapper extends Mapper<LongWritable, Text, Text, Text> {
 		Text outputKey = new Text();
 		Text outputValue = new Text();
 		
+		/*
 		if(key.toString().endsWith(this.r)){
 			for (int k = 0; k < l; k++){
 				//outputKey.set(i,k);
@@ -51,6 +52,27 @@ public class MatrixMultMapper extends Mapper<LongWritable, Text, Text, Text> {
 				outputKey.set(k + "\t" + tripel[1]);
 				//outputValue.set("B", i, b_ij);
 				outputValue.set("B" + "\t" + tripel[0] + "\t" + tripel[2]);
+				context.write(outputKey, outputValue);
+			}
+			
+		}
+		*/
+		
+		if(tripel[0].equals("A")){
+			for (int k = 0; k < l; k++){
+				//outputKey.set(i,k);
+				outputKey.set(tripel[1] + "\t" + k);
+				//outputValue.set("A", j, a_ij);
+				outputValue.set("A" + "\t" + tripel[2] + "\t" + tripel[3]);
+				context.write(outputKey, outputValue);
+			}
+			
+		} else {
+			for (int k = 0; k < m; k++){
+				//outputKey.set(k, j);
+				outputKey.set(k + "\t" + tripel[2]);
+				//outputValue.set("B", i, b_ij);
+				outputValue.set("B" + "\t" + tripel[1] + "\t" + tripel[3]);
 				context.write(outputKey, outputValue);
 			}
 			

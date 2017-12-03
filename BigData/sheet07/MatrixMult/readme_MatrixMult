@@ -1,0 +1,6 @@
+Die Aufgabe ist nicht vollständig gelöst, da die SecondarySortierung fehlt.
+
+Zusätzlich sind die Spalten von A = Zeilen von B = n
+mit n=2 hardcoded.
+
+Ein weiteres Problem war die Unterscheidung, aus welcher Datei das im Mapper ankommende Tupel kommt. Da wir keine funktionierende Lösung der ersten Aufgabe von Blatt06 haben, gehe ich in dieser Aufgabe wieder davon aus, dass in den Eingabedateien die erste Spalte mit "A" bzw. "B" gefüllt ist und diese Information mitliefert.

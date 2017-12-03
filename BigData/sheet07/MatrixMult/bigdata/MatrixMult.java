@@ -17,7 +17,7 @@ public class MatrixMult {
 				
 		Configuration conf = new Configuration();
 		//A is an m-by-n matrix, B is an n-by-l matrix
-		conf.set("A", args[0]);
+		//conf.set("A", args[0]);
 		conf.set("m", args[2]);
 		conf.set("l", args[3]);
 
