@@ -1,0 +1,77 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University/School Laboratory Report
+% LaTeX Template
+% Version 3.1 (25/3/14)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Linux and Unix Users Group at Virginia Tech Wiki 
+% (https://vtluug.org/wiki/Example_LaTeX_chem_lab_report)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+%\usepackage{algorithm}
+%\usepackage[noend]{algpseudocode}
+
+
+%\usepackage[version=3]{mhchem} % Package for chemical equation typesetting
+%\usepackage{siunitx} % Provides the \SI{}{} and \si{} command for typesetting SI units
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage{natbib} % Required to change bibliography style to APA
+\usepackage{amsmath} % Required for some math elements 
+
+\usepackage{amssymb}
+
+\usepackage{listings}
+\lstset{numbers=left, numberstyle=\tiny, numbersep=5pt}
+\lstset{language=bash}
+
+\setlength\parindent{10pt} % Removes all indentation from paragraphs
+
+\renewcommand{\labelenumi}{\alph{enumi}.} % Make numbering in the enumerate environment by letter rather than number (e.g. section 6)
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+%\title{\textsc{Big Data} \\ \textsc{Sheet 05} } % Title
+\title{Big Data \"Ubungsblatt 07}
+\author{Anton Bulat, Josephine Geiger, Julia Siekiera} % Author name
+
+
+\date{\today} % Date for the report
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+
+\section*{Aufgabe 1: Monoidhomomorphismen}
+Handelt es sich bei der Matrix-Vektor-Multiplikation f\"ur d\"unn besetzte Matrizen im Folgenden um Monoidhomomorphismen?\\
+
+\subsection*{a)}
+Map (einschließlich Sort/Shuffle):\\
+Die Map-Eingabe besteht aus dem Key $(i,j)$ als Tupel und dem Value $a_{ij}$ als DoubleWritable. Also ist diese vom Typ $Map<Tuple, DoubleWritable>$. Die Map-Eingabe ist ein Monoid bez\"uglich der Konkatenation mit dem Tripple $(Map<Tuple, DoubleWritable>,\otimes,\{\})$. Der Mapper ist ein Monoid bez\"uglich der Wertekonkatenation $(Double, \cdot, 1)$, da die Multiplikation im Wertebereich abgeschlossen ist und 1 als neutrales Element besitzt. Die Map-Ausgabe ist ein Monoid bez\"uglich der Konkatenation mit dem Tripple $(Map<IntegerWritable, DoubleWritable>,\otimes,\{\})$. Sort und Shuffle nehmen keinen Einfluss auf die Monoideigenschaft des Mappers. Nach Sort und Shuffle bleibt es bei einem Monoid und zwar bez\"uglich der Konkatenation mit dem Tripple $(Map<IntegerWritable, List<DoubleWritable>>,\otimes,\{\})$. Bei einer Aufteilung der Mapper-Eingabe in zwei St\"ucke ($((i,j), a_{\textit{first}})$- und $((i,j),a_{\textit{second}})$-Paare, wobei $a=a_{\textit{first}}+a_{\textit{second}}$) verrechnet Map $a_{\textit{first}}$ und $a_{\textit{second}}$ mit den x-Werten, die im Distributed Cache gespeichert sind, einzeln und erh\"alt $a_{ij}x_{j}$, da die Summe der beiden Teilmultiplikation die ganze Multiplikation ergeben. Damit handelt es sich um ein Monoid-Homomorphismus.\\
+
+\subsection*{b)}
+Reduce:\\
+Die Reduce-Eingabe besteht aus dem Key $i$ als IntegerWritable und dem Value $l = [a_{i1}x_{1}, ..., a_{in}x_{n}]$ als $List<DoubleWritable>$. Also ist diese vom Typ $Map<IntegerWritable, List<DoubleWritable>>$. Die Reduce-Eingabe ist ein Monoid bez\"uglich der Konkatenation mit dem Tripple $(Map<Integer$ $Writable, List<DoubleWritable>>,\otimes,\{\})$. Der Reducer ist ein Monoid bez\"uglich der Wertekonkatenation $(List<IntegerWritable>,\otimes,[])$ sowie der Wertekonkatenation $(Double, +, 0)$. Die Reduce-Ausgabe ist ein Monoid bez\"uglich der Konkatenation mit dem Tripple $(Map<IntegerWritable, DoubleWritable>>,\otimes,\{\})$. Bei einer Aufteilung der Reduce-Eingabe in zwei St\"ucke ($(i, l_{\textit{first}})$- und $(i,l_{\textit{second}})$-Paare, $l=l_{\textit{first}}+l_{\textit{second}}$) summiert Reduce $l_{\textit{first}}$ und $l_{\textit{second}}$ einzeln und erh\"alt $l$, da die Summe der beiden Teilsummen die ganze Summe ergeben. Damit ist es ein Monoid-Homomorphismus.\\
+
+\subsection*{c)}
+MapReduce insgesamt:\\
+Die MapReduce-Eingabe besteht aus dem Key $(i,j)$ als Tupel und dem Value $a_{ij}$ als DoubleWritable. Also ist diese vom Typ $Map<Tuple, DoubleWritable>$. Die MapReduce-Eingabe ist ein Monoid bez\"uglich der Konkatenation mit dem Tripple $(Map<Tuple, DoubleWritable>,\otimes,\{\})$. Die MapReduce-Ausgabe besteht aus dem Key $i$ als IntegerWritable und dem Value $l = \sum l_{j}$ als DoubleWritable. Also ist diese vom Typ $Map<IntegerWritable, DoubleWritable>$. Die Ausgabe ist ein Monoid bez\"uglich der Konkatenation mit dem Tripple $(Map<IntegerWritable, DoubleWritable>,\otimes,\{\})$. Die Ausgabe des MapReduce ist ein Monoid bez\"uglich der einzelnen Wertekonkatenationen (siehe Aufgabenteil a und b). MapReduce Eingabe und Ausgabe besitzen Monoidstrukturen. Bei einer Aufteilung der MapReduce-Eingabe in zwei St\"ucke ($((i,j), a_{\textit{first}})$- und $((i,j),a_{\textit{second}})$-Paare, wobei $a=a_{\textit{first}}+a_{\textit{second}}$) verrechnet Map und Reduce $a_{\textit{first}}$ und $a_{\textit{second}}$ einzeln und erh\"alt schließlich Werte, dessen Summe den Verrechnungen von $a$ entspricht. Damit handelt es sich um ein Monoid-Homomorphismus.\\
+
+
+\end{document}
