@@ -1,12 +1,13 @@
 import tensorflow as tf
 from ple import PLE
 import ple.games as game
-import numpy.random as num
+import random as random
 import collections as col
-import numpy
+import numpy as num
+import itertools
 import sys
 import queue
-import numpy.random as random
+
 # Tensorflow functions :
 
 # Set random values from a truncated normal distribution
@@ -83,7 +84,7 @@ class MyAgent(object):
 
     def pickRandomAction(self):
         # actions -> "up": K_w, "left": K_a, "right": K_d, "down": K_s, "none": -
-        return self.actionset[num.randint(0, 4)]
+        return self.actionset[random.randint(0, 4)]
 
     def test_random(self, p, snake, nb_frames_test):
         scores = []
@@ -108,7 +109,7 @@ class MyAgent(object):
                 scores.append(snake.getScore() + 5)  # save the scores
                 p.reset_game()
             else:
-                action_index=numpy.max(session.run(output_l,feed_dict={input_l:[current_state]}))
+                action_index=num.max(session.run(output_l,feed_dict={input_l:[current_state]}))
                 p.act(self.actionset[action_index])  # execute action
             current_state = p.getScreenGrayscale()
 
@@ -156,7 +157,7 @@ class MyAgent(object):
 
         #///////////////////////////////////////////////////////////
         # init replay memory as set
-        replay_memory = queue.Queue(maxsize=1000)
+        replay_memory = col.deque(maxlen=1000)#queue.Queue(maxsize=1000)
         current_state_snake = snake.getGameState()
 
         xt= p.getScreenGrayscale()#TODO format screen
@@ -167,35 +168,41 @@ class MyAgent(object):
                 current_state_snake = snake.getGameState()
 
             print(xt)
-            if num.random() <= explored:
-                action_index = numpy.max(session.run(output_l,feed_dict={input_l:[xt]}))
+            if random.random() <= explored:
+                action_index = num.max(session.run(output_l,feed_dict={input_l:[xt]}))
             else:
                 action_index = random.randint(0,4)
 
             reward = p.act(self.actionset[action_index])
             next_state_snake= snake.getGameState()
-            xt1 = p.getScreenGrayscale()
+            xt1 = p.getScreenGrayscale()#TODO format screen
+
             smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward)
-            if replay_memory.qsize()==replay_memory.maxsize:
+            if len(replay_memory)==replay_memory.maxlen:
                 replay_memory.get()
-            replay_memory.put((xt,action_index,smart_reward,xt1))
+            replay_memory.append((xt,action_index,smart_reward,xt1))
+
+
             # sample random minibatch of transitions from replay memory
-            mini_batch_size=10
-            mini_batch = random.sample(list(replay_memory), mini_batch_size)
-            # mini_batch variables:
-            yj = [] # expected rewards
-            prev_states = [d[0] for d in list(mini_batch)]
-            actions = [d[1] for d in list(mini_batch)]
-            curr_states = [d[3] for d in list(mini_batch)]
-            reward_action = output_l.eval(feed_dict={input_l: curr_states})
-            for j in range(0,mini_batch_size):
-                sequence=mini_batch[j]
-                if sequence[2]==-5:# if reward is - 5 next state is terminal state
-                    yj.append(sequence[2])
-                else:
-                    yj.append(sequence[2]+gamma*numpy.max(reward_action[j]))
-            # gradient descent step
-            train_operation.run(feed_dict={input_l: prev_states,action: actions,target: yj})
+            mini_batch_size=4
+            if len(replay_memory)>mini_batch_size:
+                mini_batch = random.sample(list(replay_memory), mini_batch_size)
+
+
+                # mini_batch variables:
+                yj = [] # expected rewards
+                prev_states = [d[0] for d in list(mini_batch)]
+                actions = [d[1] for d in list(mini_batch)]
+                curr_states = [d[3] for d in list(mini_batch)]
+                reward_action = output_l.eval(feed_dict={input_l: curr_states},session=session)
+                for j in range(0,mini_batch_size):
+                    sequence=mini_batch[j]
+                    if sequence[2]==-5:# if reward is - 5 next state is terminal state
+                        yj.append(sequence[2])
+                    else:
+                        yj.append(sequence[2]+gamma*num.max(reward_action[j]))
+                # gradient descent step
+                train_operation.run(feed_dict={input_l: prev_states,action: actions,target: yj})
             current_state_snake=next_state_snake
             xt=xt1
         return session,input_l,output_l
