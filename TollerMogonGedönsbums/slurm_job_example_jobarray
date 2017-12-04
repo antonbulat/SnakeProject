@@ -1,0 +1,29 @@
+#!/bin/bash
+#SBATCH -t 2:00:00 #5 hours
+#SBATCH -A jgu-inf-prakt
+#SBATCH -p short
+#SBATCH --mem=16000 #memory in MB
+#SBATCH -J snake
+#SBATCH --mail-type=END
+#SBATCH -o snake-%A-%a.output
+#SBATCH -e snake-%A-%a.error
+#SBATCH -n 1 #number of tasks
+#SBATCH -c 1 #number of cores (use more for multithreading)
+#SBATCH --array=111-999:1
+
+module load devel/protobuf-python/3.3.0-intel-2017.02-Python-3.6.1
+
+echo "JOB ID" $SLURM_ARRAY_TASK_ID
+
+#use this to run your program 5 times with parameter 1-5
+#sbatch --array=1-5 slurm_job_example_jobarray
+python mogonFile.py $SLURM_ARRAY_TASK_ID
+#echo "test"
+#for ((i=1; i < 10; i++)); do
+#    for ((j=1; j < 10; j++)); do
+#        for ((z=1; z < 10; z++)); do
+#            python snakeGame.py ${i} ${j} ${z}
+#        done
+#    done
+#done
+#echo "finished"

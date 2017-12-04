@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH -t 1:00:00 #5 hours
+#SBATCH -A jgu-inf-prakt
+#SBATCH -p visualize
+#SBATCH --mem=1600 #memory in MB
+#SBATCH -J snake
+#SBATCH --mail-type=END
+#SBATCH -o snake-%A.output
+#SBATCH -e snake-%A.error
+#SBATCH -n 1 #number of tasks
+#SBATCH -c 1 #number of cores (use more for multithreading)
+
+#module load devel/protobuf-python/3.3.0-intel-2017.02-Python-2.7.13
+module load devel/protobuf-python/3.3.0-intel-2017.02-Python-3.6.1
+
+
+python snakeGame.py
