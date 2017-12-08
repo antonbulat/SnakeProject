@@ -952,6 +952,30 @@ $$q \geq \max_{n\in B} deg(n) \Rightarrow q \geq b.$$
 F\"ur jeden Wert von $A$ gibt es bis zu $b$ Summanden, wof\"ur jeweils ein Tupel an den Reducer geschickt werden muss.
 $$r \leq \sum_{n\in B} deg(n) \Rightarrow r \leq a*b.$$
 
+\section*{Aufgabe 3: Unterschranken an Replikationsraten}
 
+\subsection*{a)}
+Der Reducer vergleicht paarweise die Tupel aus R und S, womit bei $q$ Eingabewerten maximal $\binom q 2 \approx q^2/2$ Ausgabewerte \"uberdeckt werden. Damit ist $g(q) \approx q^2/2$ f\"ur $q \geq 2$. F\"ur $q < 2$ ist $g(q) = 0$.
+
+Falls man davon ausgeht, dass der Algorithmus zur Berechnung des Schnitts dem Algorithmus auf der Folie 38 der Vorlesung 5 entspricht, wird dem Reducer zu einem beliebigen Tupel, das in R oder S enthalten ist, ein Key/Value-Paar mit genau zwei Tupeln als Value \"ubergeben, da R und S die gleichen Tupel enthalten. Somit ist unser q immer gleich 2 und ein Reducer gibt genau einen Ausgabewert aus. Somit ist $g(q)=1$.
+
+\subsection*{b)}
+Wenn $A \in \mathbb{R}^{m \times n}$ und $\vec{x}, \vec{b} \in \mathbb{R}^{n \times 1}$, dann muss $m = n$ gelten, damit die Gleichung $A\vec{x} + \vec{b}$ eine g\"ultige L\"osung $\vec{y}$ mit $\vec{y} \in \mathbb{R}^{n \times 1}$ hat (Voraussetzung gleiche Dimension bei Vektoraddition). Der Reducer berechnet einzeln die Werte $y_{i}$, womit bei $q$ Eingabewerten maximal $\binom q 1 = q$ Ausgabewerte \"uberdeckt werden. Damit ist $g(q) = q$. Bei $m \neq n$ ist $g(q) = 0$, da es keine g\"ultige L\"osung gibt. 
+
+\subsection*{c)}
+Schritt 1:
+Laut Aufgabenstellung $g(q) = \frac{\sqrt 2}{3} q^{\frac{3}{2}}$.
+
+Schritt 2:
+Als Ausgabe werden Tripel von Kanten erwartet, die jeweils eine 3-Clique bilden. In einem ungerichteten Graph mit $n$ Knoten kann es maximal $\binom n 3$ 3-Cliquen f\"ur $n > 2$ geben (wenn der Graph vollst\"andig ist). Also ist die gesamte Anzahl der Ausgaben nicht gr\"oßer als $\binom n 3$ bzw. man kann zu jeder 3er Kombination der Knoten angeben, ob es sich um eine Clique handelt oder nicht. Damit w\"are die Gesamtzahl der vom Problem generierten Ausgaben $m = \binom n 3 = \frac{n*(n-1)*(n-2)}{6} \approx \frac{n^3}{6}$
+
+Schritt 3:
+Es gilt $\sum_{i=1}^k g(q_i) \geq m$ mit $g(q_i) = \frac{\sqrt 2}{3} q_i^{\frac{3}{2}}$ und $m = \frac{n^3}{6}$, also $\Rightarrow \sum_{i=1}^k \frac{\sqrt 2}{3} q_i^{\frac{3}{2}} \geq \frac{n^3}{6} \Leftrightarrow \sum_{i=1}^k 2*\sqrt 2 q_i^{\frac{3}{2}} \geq n^3 \Leftrightarrow \sum_{i=1}^k 2*\sqrt {2*q_i^3} \geq n^3$
+
+Schritt 4:
+Da $q \geq q_i$ bleibt die Ungleichung $\sum_{i=1}^k 2*\sqrt {2*q_i^2*q} \geq n^3$ erf\"ullt. Etwas umgeformt ergibt sich $\sum_{i=1}^k q_i \geq \frac{n^3}{2*\sqrt{2*q}} \Leftrightarrow \frac{1}{n} * \sum_{i=1}^k q_i = r \geq \frac{n^2}{2*\sqrt{2*q}}$.
+
+
+\subsection*{d)}
 
 \end{document}

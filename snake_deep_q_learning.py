@@ -70,10 +70,6 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     output_l = matmul(final_hidden_activations, W_feed_forward2, b_feed_forward2)
     return input_l, output_l
 
-
-
-
-
 class MyAgent(object):
     def __init__(self, actionset, wantDebug):
         self.actionset = actionset
