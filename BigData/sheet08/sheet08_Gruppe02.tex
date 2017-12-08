@@ -1,0 +1,957 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University/School Laboratory Report
+% LaTeX Template
+% Version 3.1 (25/3/14)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Linux and Unix Users Group at Virginia Tech Wiki 
+% (https://vtluug.org/wiki/Example_LaTeX_chem_lab_report)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+%\usepackage{algorithm}
+%\usepackage[noend]{algpseudocode}
+
+
+%\usepackage[version=3]{mhchem} % Package for chemical equation typesetting
+%\usepackage{siunitx} % Provides the \SI{}{} and \si{} command for typesetting SI units
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage{natbib} % Required to change bibliography style to APA
+\usepackage{amsmath} % Required for some math elements 
+
+\usepackage{amssymb}
+
+\usepackage{tikz}
+
+\usepackage{listings}
+\lstset{numbers=left, numberstyle=\tiny, numbersep=5pt}
+\lstset{language=bash}
+
+\setlength\parindent{10pt} % Removes all indentation from paragraphs
+
+\renewcommand{\labelenumi}{\alph{enumi}.} % Make numbering in the enumerate environment by letter rather than number (e.g. section 6)
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+%\title{\textsc{Big Data} \\ \textsc{Sheet 05} } % Title
+\title{Big Data \"Ubungsblatt 08}
+\author{Anton Bulat, Josephine Geiger, Julia Siekiera} % Author name
+
+
+\date{\today} % Date for the report
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+
+\section*{Aufgabe 1: Kommunikationskosten}
+Bestimmen Sie die Kommunikationskosten der folgenden Probleme in Abh\"angigkeit der genannten Eingabegr\"o\ss en:
+
+\subsection*{a)}
+Schnitt zweier Relationen $R \cap S$ mit $r$ bzw. $s$ Tupeln (Folie 38, Vorlesung 5):\\
+Die Eingabe in den Mapper besteht aus allen Tupeln aus beiden Relationen, also sind die Kommunikationskosten hier in $\mathcal{O}(r+s)$. Da der Mapper nur die Identit\"at ist, ist die Eingabe in den Reducer genauso gro\ss. Also sind die Gesamtkommunikationskosten dieses Problems in $\mathcal{O}(2r+2s)={\mathcal O}(r+s)$.
+
+\subsection*{b)}
+Gruppenbasierter Similarity-Join mit $n$ Bildern und Gruppengr\"o\ss e $h$ (Folie 39, Vorlesung 7):\\
+Die Eingabe in den Mapper besteht aus Tupeln $(i,P_i)$ mit dem Bildindex und dem Bild. Bei $n$ Bildern sind diese Kommunikationskosten also in $\mathcal{O}(n)$. Die Eingabe in den Reducer ist h\"oher. Es werden die $n$ Bilder an jeweils $g-1$ Reducer geschickt, also liegen diese Kommunikationskosten in $\mathcal{O}(n\times\frac{n}{h})$. Die Gesamtkommunikationskosten dieses Problems liegen somit in $\mathcal{O}(\frac{n^2}{h}+n)$.
+
+\section*{Aufgabe 2: Graphische Modelle}
+\subsection*{a)}
+Grunds\"atzlich lassen sich anhand eines graphischen Modells Aussagen treffen \"uber
+\begin{itemize}
+\item die minimal m\"ogliche Reducergr\"o\ss e $q$:
+$$q \geq \max_{n\in B} deg(n).$$
+Das hei\ss t, man braucht mindestens so viele Eingaben in einem Reducer wie die h\"ochste Anzahl an Eingangskanten in einen Ausgabeknoten.
+\item die maximal ben\"otigte Replikationsrate $r$:
+$$r \leq \sum_{n\in A}deg(n) = \sum_{n\in B}deg(n).$$
+Das hei\ss t, man braucht h\"ochstens so viele Replikationen einer einzelnen Eingabe wie Kanten insgesamt. (Noch \"ofter braucht eine Eingabe nicht geschickt zu werden.)
+\end{itemize}
+
+\subsection*{b)}
+Nat\"urlicher Join $R(A, B) \bowtie S(B, C)$ mit $a$ m\"oglichen
+Werten f\"ur $A$, $b$ m\"oglichen Werten f\"ur $B$ und $c$ m\"oglichen Werten f\"ur $C$:
+\subsubsection*{i)}
+Das zugeh\"orige graphische Modell besitzt $a* b + b* c$ Eingabeknoten und $a*b*c$ Ausgabeknoten.
+\subsubsection*{ii)}
+Modell f\"ur $a = 2$, $b = 3$ und $c = 1$:
+
+% Graphic for TeX using PGF
+% Title: /home/josephine/Dokumente/UNI/Faecher/BigData/Uebung/sheet08/join.dia
+% Creator: Dia v0.97.3
+% CreationDate: Fri Dec  8 19:03:23 2017
+% For: josephine
+% \usepackage{tikz}
+% The following commands are not supported in PSTricks at present
+% We define them conditionally, so when they are implemented,
+% this pgf file will use them.
+\ifx\du\undefined
+  \newlength{\du}
+\fi
+\setlength{\du}{10\unitlength}
+\begin{tikzpicture}
+\pgftransformxscale{1.000000}
+\pgftransformyscale{-1.000000}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{7.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{7.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{7.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{11.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{11.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{11.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{15.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{15.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{15.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{19.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{19.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{19.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{23.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{23.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{23.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{27.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{27.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{27.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{31.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{31.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{31.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{35.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{35.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{35.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{39.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{39.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{39.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{9.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{9.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{9.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{13.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{13.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{13.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{17.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{17.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{17.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{21.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{21.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{21.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{25.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{25.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{25.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{29.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{29.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{29.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (7.000000\du,4.000000\du){Eingabe:};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (24.000000\du,6.000000\du){Ausgabe:};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,9.000000\du){$(a_1,b_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,13.000000\du){$(a_1,b_2)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,17.000000\du){$(a_1,b_3)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,21.000000\du){$(a_2,b_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,25.000000\du){$(a_2,b_2)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,29.000000\du){$(a_2,b_3)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,33.000000\du){$(b_1,c_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,37.000000\du){$(b_2,c_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,41.000000\du){$(b_3,c_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (25.000000\du,31.000000\du){$(a_2,b_3,c_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (25.000000\du,11.000000\du){$(a_1,b_1,c_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (25.000000\du,15.000000\du){$(a_2,b_1,c_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (25.000000\du,19.000000\du){$(a_1,b_2,c_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (25.000000\du,23.000000\du){$(a_2,b_2,c_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (25.000000\du,27.000000\du){$(a_1,b_3,c_1)$};
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,7.000000\du)--(25.000000\du,9.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,11.000000\du)--(25.000000\du,17.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,15.000000\du)--(25.000000\du,25.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,19.000000\du)--(25.000000\du,13.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,23.000000\du)--(25.000000\du,21.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,27.000000\du)--(25.000000\du,29.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,31.000000\du)--(25.000000\du,9.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,31.000000\du)--(25.000000\du,13.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,35.000000\du)--(25.000000\du,17.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,35.000000\du)--(25.000000\du,21.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,39.000000\du)--(25.000000\du,25.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,39.000000\du)--(25.000000\du,29.000000\du);
+}
+\end{tikzpicture}
+
+
+\subsubsection*{iii)}
+Schranken f\"ur $q$ und $r$ in Abh\"angigkeit von $a$, $b$ und $c$:
+$$q \geq \max_{n\in B} deg(n) \Rightarrow q \geq 2.$$
+Die untere Schranke f\"ur $q$ h\"angt hier nicht von $a$, $b$ und $c$ ab, sondern ist hier fest $\geq 2$, weil zwei Relationen gejoint werden und deshalb zwei Eingabetupel f\"ur ein m\"ogliches Ausgabetupel ben\"otigt werden.
+$$r \leq \sum_{n\in B} deg(n) \Rightarrow r \leq 2*a*b*c.$$
+
+\subsection*{c)}
+Gruppierung $\gamma_{A,SUM(B)} R(A, B)$ mit $a$ m\"oglichen Werten
+f\"ur $A$ und $b$ m\"oglichen Werten f\"ur $B$:
+\subsubsection*{i)}
+Das zugeh\"orige graphische Modell besitzt $a* b$ Eingabeknoten (gleich der Anzahl an Tupeln in der Relation $R$) und $a$ Ausgabeknoten, da f\"ur jeden Wert von $A$ eine Summe berechnet wird.
+\subsubsection*{ii)}
+
+
+% Graphic for TeX using PGF
+% Title: /home/josephine/Dokumente/UNI/Faecher/BigData/Uebung/sheet08/gruppierung.dia
+% Creator: Dia v0.97.3
+% CreationDate: Fri Dec  8 19:13:04 2017
+% For: josephine
+% \usepackage{tikz}
+% The following commands are not supported in PSTricks at present
+% We define them conditionally, so when they are implemented,
+% this pgf file will use them.
+\ifx\du\undefined
+  \newlength{\du}
+\fi
+\setlength{\du}{10\unitlength}
+\begin{tikzpicture}
+\pgftransformxscale{1.000000}
+\pgftransformyscale{-1.000000}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{7.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{7.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{7.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{11.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{11.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{11.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{15.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{15.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{15.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{19.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{19.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{9.000000\du}{19.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{9.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{9.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{9.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetlinewidth{0.100000\du}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
+\pgfsetfillcolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{13.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{fill}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{13.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+\pgfsetbuttcap
+\pgfsetmiterjoin
+\pgfsetdash{}{0pt}
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\pgfpathellipse{\pgfpoint{26.000000\du}{13.000000\du}}{\pgfpoint{1.000000\du}{0\du}}{\pgfpoint{0\du}{1.000000\du}}
+\pgfusepath{stroke}
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (7.000000\du,4.000000\du){Eingabe:};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (24.000000\du,6.000000\du){Ausgabe:};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,9.000000\du){$(a_1,b_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,13.000000\du){$(a_1,b_2)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,17.000000\du){$(a_2,b_1)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (8.000000\du,21.000000\du){$(a_2,b_2)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (25.000000\du,11.000000\du){$(a_1,\sum_i b_i)$};
+% setfont left to latex
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\node[anchor=west] at (25.000000\du,15.000000\du){$(a_2,\sum_i b_i)$};
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,7.000000\du)--(25.000000\du,9.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.200000\du,11.162500\du)--(24.959943\du,9.142350\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.000000\du,15.000000\du)--(25.000000\du,13.000000\du);
+}
+\pgfsetlinewidth{0.100000\du}
+\pgfsetdash{}{0pt}
+\pgfsetdash{}{0pt}
+\pgfsetbuttcap
+{
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetfillcolor{dialinecolor}
+% was here!!!
+\definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
+\pgfsetstrokecolor{dialinecolor}
+\draw (10.050000\du,18.812500\du)--(25.000000\du,13.000000\du);
+}
+\end{tikzpicture}
+
+\subsubsection*{iii)}
+Schranken f\"ur $q$ und $r$ in Abh\"angigkeit von $a$ und $b$:
+$$q \geq \max_{n\in B} deg(n) \Rightarrow q \geq b.$$
+F\"ur jeden Wert von $A$ gibt es bis zu $b$ Summanden, wof\"ur jeweils ein Tupel an den Reducer geschickt werden muss.
+$$r \leq \sum_{n\in B} deg(n) \Rightarrow r \leq a*b.$$
+
+
+
+\end{document}
