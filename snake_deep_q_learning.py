@@ -4,9 +4,7 @@ import ple.games as game
 import random as random
 import collections as col
 import numpy as num
-import itertools
-import sys
-import queue
+
 
 # Tensorflow functions :
 
@@ -48,9 +46,9 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     W_conv3 = weight_variable([3, 3, 64, 64])
     b_conv3 = bias_variable([64])
 
-    W_feed_forward1 = weight_variable([256, 256])
-    b_feed_forward1 = bias_variable([256])
-    W_feed_forward2 = weight_variable([256, nb_actions])
+    W_feed_forward1 = weight_variable([64, 64])
+    b_feed_forward1 = bias_variable([64])
+    W_feed_forward2 = weight_variable([64, nb_actions])
     b_feed_forward2 = bias_variable([nb_actions])
 
     # init input layer
@@ -64,11 +62,39 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     hidden_max_pooling_l3 = max_pool_2x2(hidden_conv_l3)
 
 
-    hidden_conv_l3_flat = tf.reshape(hidden_max_pooling_l3, [-1, 256])
+    hidden_conv_l3_flat = tf.reshape(hidden_max_pooling_l3, [-1, 64])#todo 320 values?!----256
 
     final_hidden_activations = tf.nn.relu(matmul(hidden_conv_l3_flat, W_feed_forward1, b_feed_forward1))
     output_l = matmul(final_hidden_activations, W_feed_forward2, b_feed_forward2)
     return input_l, output_l
+
+#create an image of dimension <=4
+def init_phi_function(phi_t, xt):
+    result=[]
+    if not phi_t:# first initialisation step
+        for row in xt:
+            new_row=[]
+            for elem in row:
+                new_row.append([elem])
+            result.append(new_row)
+    else:
+        for i in range(0,len(xt)):
+            new_row=[]
+            for j in range(0,len(xt[i])):
+                new_row.append(phi_t[i][j]+[xt[i][j]])
+            result.append(new_row)
+    return result
+
+
+def phi_function(phi_t, xt):
+    result=[]
+    for i in range(0, len(xt)):
+        new_row = []
+        for j in range(0, len(xt[i])):
+            new_row.append(phi_t[i][j][1:4] + [xt[i][j]])
+        result.append(new_row)
+    return result
+
 
 class MyAgent(object):
     def __init__(self, actionset, wantDebug):
@@ -99,15 +125,36 @@ class MyAgent(object):
     def test(self, p, snake, nb_frames_test,session,input_l,output_l):
         scores = []
         p.init()
-        current_state = p.getScreenGrayscale()
+        #todo first 4 actions are random for initialisation! how to fix this?!
+        xt = p.getScreenGrayscale()
+
+        phi_t = None
+        # execute the first step for initialisation of phi t
+        phi_t = init_phi_function(phi_t, xt)
+        action_index = random.randint(0, 4)
+        p.act(self.actionset[action_index])
+        xt = p.getScreenGrayscale()
+        # execute the next 4 steps for initialisation of phi t and phi t+1
+        for i in range(0, 4):
+            if p.game_over():
+                p.reset_game()  # do not save end images
+                xt = p.getScreenGrayscale()
+            phi_t = init_phi_function(phi_t, xt)
+            action_index = random.randint(0, 4)
+            p.act(self.actionset[action_index])
+            xt = p.getScreenGrayscale()
+
+        # so now both deques have length 4... we could start training
         for f in range(nb_frames_test):
             if p.game_over():
                 scores.append(snake.getScore() + 5)  # save the scores
                 p.reset_game()
-            else:
-                action_index=num.max(session.run(output_l,feed_dict={input_l:[current_state]}))
-                p.act(self.actionset[action_index])  # execute action
-            current_state = p.getScreenGrayscale()
+                xt = p.getScreenGrayscale()
+
+            phi_t = phi_function(phi_t, xt)
+            action_index=num.argmax(session.run(output_l,feed_dict={input_l:[phi_t]}))#get index of best action
+            p.act(self.actionset[action_index])  # execute action
+            xt=p.getScreenGrayscale()
 
         return scores
 
@@ -153,44 +200,65 @@ class MyAgent(object):
 
         #///////////////////////////////////////////////////////////
         # init replay memory as set
-        replay_memory = col.deque(maxlen=1000)#queue.Queue(maxsize=1000)
+        replay_memory = col.deque(maxlen=1000)
         current_state_snake = snake.getGameState()
 
-        xt= p.getScreenGrayscale()#TODO format screen
+        xt= p.getScreenGrayscale()
+
+        phi_t=None
+        phi_tp1=None
+        # execute the first step for initialisation of phi t
+        phi_t=init_phi_function(phi_t,xt)
+
+        action_index = random.randint(0, 4)
+        p.act(self.actionset[action_index])
+        xt = p.getScreenGrayscale()
+        # execute the next 4 steps for initialisation of phi t and phi t+1
+        for i in range(0,4):
+            if p.game_over():
+                p.reset_game()# do not save end images
+                xt = p.getScreenGrayscale()
+            if i<3:# to have the elements shifted in the deques
+                phi_t=init_phi_function(phi_t,xt)
+            phi_tp1=init_phi_function(phi_tp1,xt)
+            action_index = random.randint(0, 4)
+            p.act(self.actionset[action_index])
+            xt = p.getScreenGrayscale()
+
+        # so now both deques have length 4... we could start learning
         for t in range(1,nb_frames):
             if p.game_over():
                 p.reset_game()
                 xt = p.getScreenGrayscale()
                 current_state_snake = snake.getGameState()
 
-            print(xt)
             if random.random() <= explored:
-                action_index = num.max(session.run(output_l,feed_dict={input_l:[xt]}))
+                action_index = num.argmax(session.run(output_l,feed_dict={input_l:[phi_t]}))
             else:
                 action_index = random.randint(0,4)
 
             reward = p.act(self.actionset[action_index])
             next_state_snake= snake.getGameState()
-            xt1 = p.getScreenGrayscale()#TODO format screen
+            xt1 = p.getScreenGrayscale()
+
+            phi_t=phi_function(phi_t,xt)
+            phi_tp1=phi_function(phi_tp1,xt1)
 
             smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward)
-            if len(replay_memory)==replay_memory.maxlen:
-                replay_memory.get()
-            replay_memory.append((xt,action_index,smart_reward,xt1))
-
+            replay_memory.append((phi_t,action_index,smart_reward,phi_t))
 
             # sample random minibatch of transitions from replay memory
-            mini_batch_size=4
+            mini_batch_size=5 # test diffrent configurations
             if len(replay_memory)>mini_batch_size:
                 mini_batch = random.sample(list(replay_memory), mini_batch_size)
-
 
                 # mini_batch variables:
                 yj = [] # expected rewards
                 prev_states = [d[0] for d in list(mini_batch)]
-                actions = [d[1] for d in list(mini_batch)]
+                actions = [[d[1],0,0,0] for d in list(mini_batch)]# TODO !!!!!!!!!!!!!!!!!!!!! this is just set to get the network running fill the zeros with somethin usefull
                 curr_states = [d[3] for d in list(mini_batch)]
                 reward_action = output_l.eval(feed_dict={input_l: curr_states},session=session)
+
                 for j in range(0,mini_batch_size):
                     sequence=mini_batch[j]
                     if sequence[2]==-5:# if reward is - 5 next state is terminal state
@@ -198,7 +266,7 @@ class MyAgent(object):
                     else:
                         yj.append(sequence[2]+gamma*num.max(reward_action[j]))
                 # gradient descent step
-                train_operation.run(feed_dict={input_l: prev_states,action: actions,target: yj})
+                train_operation.run(feed_dict={input_l: prev_states, action: actions, target: yj},session=session)
             current_state_snake=next_state_snake
             xt=xt1
         return session,input_l,output_l
