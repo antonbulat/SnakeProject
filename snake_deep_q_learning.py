@@ -4,6 +4,7 @@ import ple.games as game
 import random as random
 import collections as col
 import numpy as num
+#import cv2
 
 
 # Tensorflow functions :
@@ -68,9 +69,17 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     output_l = matmul(final_hidden_activations, W_feed_forward2, b_feed_forward2)
     return input_l, output_l
 
+
+def reformat_to_grey_screen(xt):
+    return num.dot(xt[..., :3], [0.299, 0.587, 0.114])
+
+
 #create an image of dimension <=4
 def init_phi_function(phi_t, xt):
     result=[]
+    #print("before transformation",xt)
+    #xt=reformat_to_grey_screen(xt)
+    #print("after transformation:",xt)
     if not phi_t:# first initialisation step
         for row in xt:
             new_row=[]
@@ -88,6 +97,7 @@ def init_phi_function(phi_t, xt):
 
 def phi_function(phi_t, xt):
     result=[]
+    #xt=reformat_to_grey_screen(xt)
     for i in range(0, len(xt)):
         new_row = []
         for j in range(0, len(xt[i])):
@@ -153,6 +163,7 @@ class MyAgent(object):
 
             phi_t = phi_function(phi_t, xt)
             action_index=num.argmax(session.run(output_l,feed_dict={input_l:[phi_t]}))#get index of best action
+            print("Action index: ",action_index,session.run(output_l,feed_dict={input_l:[phi_t]}))
             p.act(self.actionset[action_index])  # execute action
             xt=p.getScreenGrayscale()
 
@@ -203,10 +214,11 @@ class MyAgent(object):
         replay_memory = col.deque(maxlen=1000)
         current_state_snake = snake.getGameState()
 
-        xt= p.getScreenGrayscale()
+        xt= p.getScreenRGB()
 
         phi_t=None
         phi_tp1=None
+        action_array=[]
         # execute the first step for initialisation of phi t
         phi_t=init_phi_function(phi_t,xt)
 
@@ -222,6 +234,7 @@ class MyAgent(object):
                 phi_t=init_phi_function(phi_t,xt)
             phi_tp1=init_phi_function(phi_tp1,xt)
             action_index = random.randint(0, 4)
+            action_array.append(action_index)
             p.act(self.actionset[action_index])
             xt = p.getScreenGrayscale()
 
@@ -243,19 +256,20 @@ class MyAgent(object):
 
             phi_t=phi_function(phi_t,xt)
             phi_tp1=phi_function(phi_tp1,xt1)
+            action_array=action_array[1:4]+[action_index]
 
             smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward)
-            replay_memory.append((phi_t,action_index,smart_reward,phi_t))
+            replay_memory.append((phi_t,action_array,smart_reward,phi_tp1))
 
             # sample random minibatch of transitions from replay memory
-            mini_batch_size=5 # test diffrent configurations
+            mini_batch_size=30 # test diffrent configurations
             if len(replay_memory)>mini_batch_size:
                 mini_batch = random.sample(list(replay_memory), mini_batch_size)
 
                 # mini_batch variables:
                 yj = [] # expected rewards
                 prev_states = [d[0] for d in list(mini_batch)]
-                actions = [[d[1],0,0,0] for d in list(mini_batch)]# TODO !!!!!!!!!!!!!!!!!!!!! this is just set to get the network running fill the zeros with somethin usefull
+                actions = [d[1] for d in list(mini_batch)]# TODO
                 curr_states = [d[3] for d in list(mini_batch)]
                 reward_action = output_l.eval(feed_dict={input_l: curr_states},session=session)
 
@@ -285,9 +299,9 @@ def main():
     learner = float(input[1]) / 10
     explored = float(input[2]) / 10
     '''
-    session, input_l, output_l = myAgent.train(p, snake, 100, 0.1, 0.1, 0.1)
+    session, input_l, output_l = myAgent.train(p, snake, 10000, 0.1, 0.1, 0.1)
 
-    learned_scores = myAgent.test( p, snake, 100,session, input_l, output_l)
+    learned_scores = myAgent.test( p, snake, 1000,session, input_l, output_l)
     result = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     for elem in learned_scores:
         result[int(elem)] += 1
