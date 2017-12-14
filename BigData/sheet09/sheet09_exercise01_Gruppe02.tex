@@ -1,0 +1,93 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University/School Laboratory Report
+% LaTeX Template
+% Version 3.1 (25/3/14)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Linux and Unix Users Group at Virginia Tech Wiki 
+% (https://vtluug.org/wiki/Example_LaTeX_chem_lab_report)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+%\usepackage{algorithm}
+%\usepackage[noend]{algpseudocode}
+
+
+%\usepackage[version=3]{mhchem} % Package for chemical equation typesetting
+%\usepackage{siunitx} % Provides the \SI{}{} and \si{} command for typesetting SI units
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage{natbib} % Required to change bibliography style to APA
+\usepackage{amsmath} % Required for some math elements 
+
+\usepackage{amssymb}
+
+\usepackage{tikz}
+
+\usepackage{listings}
+\lstset{numbers=left, numberstyle=\tiny, numbersep=5pt}
+\lstset{language=bash}
+
+\setlength\parindent{10pt} % Removes all indentation from paragraphs
+
+\renewcommand{\labelenumi}{\alph{enumi}.} % Make numbering in the enumerate environment by letter rather than number (e.g. section 6)
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+%\title{\textsc{Big Data} \\ \textsc{Sheet 05} } % Title
+\title{Big Data \"Ubungsblatt 09}
+\author{Anton Bulat, Josephine Geiger, Julia Siekiera} % Author name
+
+
+\date{\today} % Date for the report
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+
+\section*{Aufgabe 1: Unterschranken an die Replikationsraten}
+
+Gegeben: Map-Reduce-Programm, das alle Pfade der L\"ange $2$ in einem gerichteten Graphen mit $n$ Knoten findet.\\
+Eingabe: Liste aller Kanten. Das Tupel $(u,v)$ beschreibt eine Kante von Knoten $u$ nach Knoten $v$.\\
+Gesucht: geeignete Unterschranke an die Replikationsrate $r$ mithilfe des Beweisschemas aus der Vorlesung.
+
+
+\begin{itemize}
+\item Schritt 1:\\
+Ein Reducer kann mit $q$ Eingaben maximal $\binom q 2 \approx \frac{q^2}{2}$ Ausgabewerte \"uberdecken, also Pfade der L\"ange $2$. Das hei\ss t
+$$g(q) = \frac{q^2}{2}.$$
+
+\item Schritt 2:\\
+Als Ausgabe werden Tripel von Knoten erwartet, die jeweils einen Pfad der L\"ange $2$ bilden, also zwei Kanten verbinden. In einem gerichteten Graphen mit $n$ Knoten kann es maximal $2\times \binom n 2 = 2\times \frac{n!}{2!(n-2)!} = n\times(n-1)$ Kanten geben.\\
+Also ist die Gesamtzahl der vom Problem generierten Ausgaben $$m = \binom{n \times(n-1)} 2 \approx \frac{(n^2-n)^2}{2}.$$
+
+\item Schritt 3:\\
+Es gilt $\sum_{i=1}^k g(q_i) \geq m$ mit $g(q_i) = \frac{q_i^2}{2}$ und $m \approx \frac{(n^2-n)^2}{2}$, also\\
+$\Rightarrow \sum_{i=1}^k \frac{q_i^2}{2} \geq \frac{(n^2-n)^2}{2}\\ \Leftrightarrow \sum_{i=1}^k q_i^2 \geq (n^2-n)^2$.\\
+\item Schritt 4:\\
+Da $q \geq q_i$ bleibt die Ungleichung erf\"ullt:
+$$\sum_{i=1}^k qq_i \geq (n^2-n)^2\\
+\Leftrightarrow q \sum_{i=1}^k q_i \geq (n^2-n)^2\\
+\Leftrightarrow \sum_{i=1}^k q_i \geq \frac{(n^2-n)^2}{q}.$$
+
+\item Schritt 5:\\
+Die Anzahl der Eingaben entspricht der Anzahl an Kanten, also $n\times(n-1)$. Nach Division durch diesen Wert ergibt sich die untere Schranke f\"ur $r$:
+$$ \frac{1}{n\times(n-1)} \sum_{i=1}^k q_i = r \geq \frac{n^2-n}{q}.$$
+\end{itemize}
+
+\end{document}
