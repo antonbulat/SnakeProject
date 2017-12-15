@@ -4,6 +4,7 @@ import ple.games as game
 import random as random
 import collections as col
 import numpy as num
+import time
 #import cv2
 
 
@@ -70,9 +71,6 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     return input_l, output_l
 
 
-def reformat_to_grey_screen(xt):
-    return num.dot(xt[..., :3], [0.299, 0.587, 0.114])
-
 
 #create an image of dimension <=4
 def init_phi_function(phi_t, xt):
@@ -83,14 +81,14 @@ def init_phi_function(phi_t, xt):
     if not phi_t:# first initialisation step
         for row in xt:
             new_row=[]
-            for elem in row:
-                new_row.append([elem])
+            for i in range(0,len(row)):
+                new_row.append([row[i]/255])#TODO initialisation problem
             result.append(new_row)
     else:
         for i in range(0,len(xt)):
             new_row=[]
             for j in range(0,len(xt[i])):
-                new_row.append(phi_t[i][j]+[xt[i][j]])
+                new_row.append(phi_t[i][j]+[xt[i][j]/255])
             result.append(new_row)
     return result
 
@@ -101,7 +99,7 @@ def phi_function(phi_t, xt):
     for i in range(0, len(xt)):
         new_row = []
         for j in range(0, len(xt[i])):
-            new_row.append(phi_t[i][j][1:4] + [xt[i][j]])
+            new_row.append(phi_t[i][j][1:4] + [xt[i][j]/255])
         result.append(new_row)
     return result
 
@@ -162,8 +160,8 @@ class MyAgent(object):
                 xt = p.getScreenGrayscale()
 
             phi_t = phi_function(phi_t, xt)
-            action_index=num.argmax(session.run(output_l,feed_dict={input_l:[phi_t]}))#get index of best action
-            print("Action index: ",action_index,session.run(output_l,feed_dict={input_l:[phi_t]}))
+            action_index=num.argmax(session.run(output_l,feed_dict={input_l:[phi_t]})[0])#get index of best action
+            #print("Action index: ",action_index,session.run(output_l,feed_dict={input_l:[phi_t]}))
             p.act(self.actionset[action_index])  # execute action
             xt=p.getScreenGrayscale()
 
@@ -171,13 +169,13 @@ class MyAgent(object):
 
     def getSmartReward(self, current_state_snake, next_state_snake, reward):
         if reward == -5:  # game over
-            return -5
+            return 0
         elif reward == 1:  # Snake found apple
-            return 4
+            return 1
         else:
             if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
-                return 1
-            return -1  # snake goes away from apple
+                return 0.7
+            return 0.2  # snake goes away from apple
 
     def foodIsNearer(self, state1, state2):
         if (abs(state1["snake_head_x"] - state1["food_x"]) + abs(state1["snake_head_y"] - state1["food_y"])
@@ -194,16 +192,16 @@ class MyAgent(object):
         pass
     # deep Q-Leaning Algorithm
     # returns a trained neuronal network
-    def train(self, p, snake, nb_frames, gamma, learner, explored, screen_size_x=64, screen_size_y=64):
+    def train(self, p, snake, nb_frames, gamma, explored, screen_size_x=64, screen_size_y=64,mini_batch_size=8):
         # init game
         p.init()
-        nb_actions = 4  # number of possible actions
+        nb_actions = 5  # number of possible actions TODO change to 5
         input_frames = 4  # number of frames to consider as input
         session = tf.Session()
         # Create neuronal network with 3 layers
-        input_l, output_l = init_neural_network(screen_size_x, screen_size_y, input_frames, nb_actions)
-        action = tf.placeholder("float", [None, nb_actions])
-        target = tf.placeholder("float", [None])
+        input_l, output_l = init_neural_network(screen_size_x, screen_size_y, nb_frames=input_frames,nb_actions= nb_actions)
+        action = tf.placeholder("float", [None, nb_actions])#?!
+        target = tf.placeholder("float", [None])#?!
         readout_action = tf.reduce_sum(tf.multiply(output_l, action), reduction_indices=1)
         cost = tf.reduce_mean(tf.square(target - readout_action))
         train_operation = tf.train.AdamOptimizer(1e-6).minimize(cost)
@@ -214,15 +212,15 @@ class MyAgent(object):
         replay_memory = col.deque(maxlen=1000)
         current_state_snake = snake.getGameState()
 
-        xt= p.getScreenRGB()
+        xt= p.getScreenGrayscale()
 
         phi_t=None
         phi_tp1=None
-        action_array=[]
+
         # execute the first step for initialisation of phi t
         phi_t=init_phi_function(phi_t,xt)
 
-        action_index = random.randint(0, 4)
+        action_index = random.randint(0, 4)#todo
         p.act(self.actionset[action_index])
         xt = p.getScreenGrayscale()
         # execute the next 4 steps for initialisation of phi t and phi t+1
@@ -234,35 +232,42 @@ class MyAgent(object):
                 phi_t=init_phi_function(phi_t,xt)
             phi_tp1=init_phi_function(phi_tp1,xt)
             action_index = random.randint(0, 4)
-            action_array.append(action_index)
             p.act(self.actionset[action_index])
             xt = p.getScreenGrayscale()
 
+
         # so now both deques have length 4... we could start learning
         for t in range(1,nb_frames):
+
             if p.game_over():
                 p.reset_game()
                 xt = p.getScreenGrayscale()
                 current_state_snake = snake.getGameState()
 
+
+            action_array = num.zeros([nb_actions])
+
             if random.random() <= explored:
-                action_index = num.argmax(session.run(output_l,feed_dict={input_l:[phi_t]}))
+                #print("---",phi_t)
+                arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
+                action_index = num.argmax(arr)
+                #print("training:",action_index,arr)
             else:
                 action_index = random.randint(0,4)
 
+            action_array[action_index] = 1
             reward = p.act(self.actionset[action_index])
             next_state_snake= snake.getGameState()
             xt1 = p.getScreenGrayscale()
 
             phi_t=phi_function(phi_t,xt)
             phi_tp1=phi_function(phi_tp1,xt1)
-            action_array=action_array[1:4]+[action_index]
 
             smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward)
             replay_memory.append((phi_t,action_array,smart_reward,phi_tp1))
 
             # sample random minibatch of transitions from replay memory
-            mini_batch_size=30 # test diffrent configurations
+             # test diffrent configurations
             if len(replay_memory)>mini_batch_size:
                 mini_batch = random.sample(list(replay_memory), mini_batch_size)
 
@@ -271,14 +276,15 @@ class MyAgent(object):
                 prev_states = [d[0] for d in list(mini_batch)]
                 actions = [d[1] for d in list(mini_batch)]# TODO
                 curr_states = [d[3] for d in list(mini_batch)]
-                reward_action = output_l.eval(feed_dict={input_l: curr_states},session=session)
 
+                #reward_a = output_l.eval(feed_dict={input_l: curr_states},session=session)
+                reward_a = session.run(output_l,feed_dict={input_l: curr_states})
                 for j in range(0,mini_batch_size):
                     sequence=mini_batch[j]
-                    if sequence[2]==-5:# if reward is - 5 next state is terminal state
+                    if sequence[2]==0:# if reward is 0 next state is terminal state
                         yj.append(sequence[2])
                     else:
-                        yj.append(sequence[2]+gamma*num.max(reward_action[j]))
+                        yj.append(sequence[2]+gamma*num.max(reward_a[j]))
                 # gradient descent step
                 train_operation.run(feed_dict={input_l: prev_states, action: actions, target: yj},session=session)
             current_state_snake=next_state_snake
@@ -299,15 +305,18 @@ def main():
     learner = float(input[1]) / 10
     explored = float(input[2]) / 10
     '''
-    session, input_l, output_l = myAgent.train(p, snake, 10000, 0.1, 0.1, 0.1)
+    start_time = time.time()
+    session, input_l, output_l = myAgent.train(p, snake, 1000, 0.8, explored=0.2,mini_batch_size=100)
+    end_time = time.time()
+
 
     learned_scores = myAgent.test( p, snake, 1000,session, input_l, output_l)
-    result = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    result = [0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     for elem in learned_scores:
         result[int(elem)] += 1
     for i in range(0,len(result)-1):
         print(result[i],end=";")
     print(result[len(result)-1])
-
+    print("TIME OF Q_LEARNING", end_time - start_time)
 
 if __name__ == '__main__': main()
