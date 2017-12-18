@@ -82,13 +82,13 @@ def init_phi_function(phi_t, xt):
         for row in xt:
             new_row=[]
             for i in range(0,len(row)):
-                new_row.append([row[i]/255])#TODO initialisation problem
+                new_row.append([row[i]/255])#TODO Sicherstellen, dass keine Integer Division vorliegt
             result.append(new_row)
     else:
         for i in range(0,len(xt)):
             new_row=[]
             for j in range(0,len(xt[i])):
-                new_row.append(phi_t[i][j]+[xt[i][j]/255])
+                new_row.append(phi_t[i][j]+[xt[i][j]/255]) #TODO Sicherstellen, dass keine Integer Division vorliegt
             result.append(new_row)
     return result
 
