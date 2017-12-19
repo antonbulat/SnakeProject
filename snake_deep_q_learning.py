@@ -274,7 +274,7 @@ class MyAgent(object):
                 # mini_batch variables:
                 yj = [] # expected rewards
                 prev_states = [d[0] for d in list(mini_batch)]
-                actions = [d[1] for d in list(mini_batch)]# TODO
+                actions = [d[1] for d in list(mini_batch)]# TODO...
                 curr_states = [d[3] for d in list(mini_batch)]
 
                 #reward_a = output_l.eval(feed_dict={input_l: curr_states},session=session)
