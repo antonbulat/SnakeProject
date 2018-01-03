@@ -5,7 +5,7 @@ import random as random
 import collections as col
 import numpy as num
 import time
-#import cv2
+import cv2
 
 # Tensorflow functions :
 # Set random values from a truncated normal distribution
@@ -36,6 +36,7 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     # First Convolutional Layer
     # 32 Features for each 8x8 patch, input channels = 4
     # bias vector with a component for each output channel
+
     W_conv1 = weight_variable([8, 8, nb_frames, 32])
     b_conv1 = bias_variable([32])
     # Second Convolutional Layer
@@ -45,9 +46,9 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     W_conv3 = weight_variable([3, 3, 64, 64])
     b_conv3 = bias_variable([64])
 
-    W_feed_forward1 = weight_variable([64, 64])
-    b_feed_forward1 = bias_variable([64])
-    W_feed_forward2 = weight_variable([64, nb_actions])
+    W_feed_forward1 = weight_variable([256, 256])#TODO change to 64
+    b_feed_forward1 = bias_variable([256])
+    W_feed_forward2 = weight_variable([256, nb_actions])
     b_feed_forward2 = bias_variable([nb_actions])
 
     # init input layer
@@ -61,44 +62,23 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     hidden_max_pooling_l3 = max_pool_2x2(hidden_conv_l3)
 
 
-    hidden_conv_l3_flat = tf.reshape(hidden_max_pooling_l3, [-1, 64])#todo 320 values?!----256
+    hidden_conv_l3_flat = tf.reshape(hidden_max_pooling_l3, [-1, 256])#todo 320 values?!----256
 
-    final_hidden_activations = tf.nn.relu(matmul(hidden_conv_l3_flat, W_feed_forward1, b_feed_forward1))
+    final_hidden_activations = tf.nn.relu(matmul(hidden_conv_l3_flat, W_feed_forward1,b_feed_forward1))
     output_l = matmul(final_hidden_activations, W_feed_forward2, b_feed_forward2)
     return input_l, output_l
 
 
-
-#create an image of dimension <=4
 def init_phi_function(phi_t, xt):
-    result=[]
-    #print("before transformation",xt)
-    #xt=reformat_to_grey_screen(xt)
-    #print("after transformation:",xt)
-    if not phi_t:# first initialisation step
-        for row in xt:
-            new_row=[]
-            for i in range(0,len(row)):
-                new_row.append([float(row[i])/255])#TODO Sicherstellen, dass keine Integer Division vorliegt
-            result.append(new_row)
-    else:
-        for i in range(0,len(xt)):
-            new_row=[]
-            for j in range(0,len(xt[i])):
-                new_row.append(phi_t[i][j]+[float(xt[i][j])/255]) #TODO Sicherstellen, dass keine Integer Division vorliegt
-            result.append(new_row)
-    return result
-
-
+    _, screen_resized_binary = cv2.threshold(xt, 26, 255, cv2.THRESH_BINARY)
+    state = num.stack(tuple(screen_resized_binary for _ in range(4)), axis=2)
+    return state
 def phi_function(phi_t, xt):
-    result=[]
-    #xt=reformat_to_grey_screen(xt)
-    for i in range(0, len(xt)):
-        new_row = []
-        for j in range(0, len(xt[i])):
-            new_row.append(phi_t[i][j][1:4] + [float(xt[i][j])/255])
-        result.append(new_row)
+    _, screen_resized_binary = cv2.threshold(xt, 26, 255, cv2.THRESH_BINARY)
+    transform= num.reshape(screen_resized_binary,(80,80,1))
+    result=num.append(phi_t[:, :, 1:], transform, axis=2)
     return result
+
 
 
 class MyAgent(object):
@@ -127,7 +107,8 @@ class MyAgent(object):
                 scores.append(snake.getScore())
         return scores
 
-    def test(self, p, snake, nb_frames_test, session, input_l, output_l):
+    def test(self, p, snake, time_sec, session, input_l, output_l):
+        start_time = time.time()
         scores = []
         p.init()
         #todo first 4 actions are random for initialisation! how to fix this?!
@@ -139,6 +120,7 @@ class MyAgent(object):
         action_index = random.randint(0, 4)
         p.act(self.actionset[action_index])
         xt = p.getScreenGrayscale()
+
         # execute the next 4 steps for initialisation of phi t and phi t+1
         for i in range(0, 4):
             if p.game_over():
@@ -150,7 +132,7 @@ class MyAgent(object):
             xt = p.getScreenGrayscale()
 
         # so now both deques have length 4... we could start training
-        for f in range(nb_frames_test):
+        while(time.time()-start_time<time_sec):
             if p.game_over():
                 scores.append(snake.getScore() + 5)  # save the scores
                 p.reset_game()
@@ -158,7 +140,7 @@ class MyAgent(object):
 
             phi_t = phi_function(phi_t, xt)
             action_index=num.argmax(session.run(output_l, feed_dict={input_l:[phi_t]})[0])#get index of best action
-            #print("Action index: ",action_index,session.run(output_l,feed_dict={input_l:[phi_t]}))
+            print("Action index: ",action_index,session.run(output_l,feed_dict={input_l:[phi_t]}))
             p.act(self.actionset[action_index])  # execute action
             xt=p.getScreenGrayscale()
 
@@ -185,23 +167,24 @@ class MyAgent(object):
                 print("Movement in wrong direction")
             return False
 
-    def generate_max_action(self):
-        pass
+    #def generate_max_action(self):
+    #    pass
     # deep Q-Leaning Algorithm
     # returns a trained neuronal network
-    def train(self, p, snake, nb_frames, gamma, explored, screen_size_x=64, screen_size_y=64,mini_batch_size=8):
-        want_time_tracking = True
+    def train(self, p, snake, time_sec, gamma, explored,
+              screen_size_x=64, screen_size_y=64,mini_batch_size=16,want_time_tracking = False):
+        start_time = time.time()
         #want_print_information = True TODO noch nicht implementiert
 
         # init game
         p.init()
-        nb_actions = 5  # number of possible actions TODO change to 5
+        nb_actions = 5  # number of possible actions
         input_frames = 4  # number of frames to consider as input
         session = tf.Session()
         # Create neuronal network with 3 layers
         input_l, output_l = init_neural_network(screen_size_x, screen_size_y, nb_frames=input_frames,nb_actions= nb_actions)
-        action = tf.placeholder("float", [None, nb_actions])#?!
-        target = tf.placeholder("float", [None])#?!
+        action = tf.placeholder("float", [None, nb_actions])
+        target = tf.placeholder("float", [None])
         readout_action = tf.reduce_sum(tf.multiply(output_l, action), reduction_indices=1)
         cost = tf.reduce_mean(tf.square(target - readout_action))
         train_operation = tf.train.AdamOptimizer(1e-6).minimize(cost)
@@ -209,21 +192,19 @@ class MyAgent(object):
 
         #///////////////////////////////////////////////////////////
         # init replay memory as set
-        replay_memory = col.deque(maxlen=10000)
+        replay_memory = col.deque(maxlen=100000)
         nb_random_actions_at_begin = 1000
         current_state_snake = snake.getGameState()
 
         xt= p.getScreenGrayscale()
-
         phi_t=None
-        phi_tp1=None
-
         # execute the first step for initialisation of phi t
         phi_t=init_phi_function(phi_t,xt)
 
         action_index = random.randint(0, 4)#TODO reduce number of actions
         p.act(self.actionset[action_index])
         xt = p.getScreenGrayscale()
+        '''
         # execute the next 4 steps for initialisation of phi t and phi t+1
         for i in range(0,4):
             if p.game_over():
@@ -235,10 +216,13 @@ class MyAgent(object):
             action_index = random.randint(0, 4)
             p.act(self.actionset[action_index])
             xt = p.getScreenGrayscale()
-
+        '''
+        phi_tp1 = phi_function(phi_t, xt)
 
         # so now both deques have length 4... we could start learning
-        for t in range(1,nb_frames):
+        t=0
+        while(time.time()-start_time<time_sec):
+            t+=1
             if want_time_tracking:
                 start_time_training_frame = time.time()
             if p.game_over():
@@ -253,7 +237,7 @@ class MyAgent(object):
                 #print("---",phi_t)
                 arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
                 action_index = num.argmax(arr)
-                #print("training:",action_index,arr)
+                print("training:",action_index,arr)
             else:
                 action_index = random.randint(0,4)
 
@@ -266,42 +250,32 @@ class MyAgent(object):
             phi_tp1=phi_function(phi_tp1,xt1)
 
             smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward)
-            #print("Replay Memory: " + str(len(replay_memory)))
             replay_memory.append((phi_t,action_array,smart_reward,phi_tp1))
-            #print("Replay Memory: " + str(len(replay_memory)))
             # sample random minibatch of transitions from replay memory
             # test diffrent configurations
-            #print("Mini Batch Size: " + str(mini_batch_size))
             if len(replay_memory)>mini_batch_size:
-                print("Replay Memory bigger then Mini Batch")
                 mini_batch = random.sample(list(replay_memory), mini_batch_size)
 
                 # mini_batch variables:
                 yj = [] # expected rewards
                 prev_states = [d[0] for d in list(mini_batch)]
-                actions = [d[1] for d in list(mini_batch)]# TODO...
+                actions = [d[1] for d in list(mini_batch)]
                 curr_states = [d[3] for d in list(mini_batch)]
-
                 #reward_a = output_l.eval(feed_dict={input_l: curr_states},session=session)
-                if want_time_tracking:
-                    start_time_run_session = time.time()
                 reward_a = session.run(output_l,feed_dict={input_l: curr_states})
-                if want_time_tracking:
-                    end_time_run_session = time.time()
-                    print("Time for run a session: " + str(end_time_run_session - start_time_run_session))
+
                 for j in range(0,mini_batch_size):
                     sequence=mini_batch[j]
+                    (aa,bb,cc,bb)=mini_batch[j]
+                    #print("sequence",sequence)# todo look at sequence
                     if sequence[2]==0:# if reward is 0 next state is terminal state
                         yj.append(sequence[2])
                     else:
                         yj.append(sequence[2]+gamma*num.max(reward_a[j]))
                 # gradient descent step
-                if want_time_tracking:
-                    start_time_gradient_decent = time.time()
+
                 train_operation.run(feed_dict={input_l: prev_states, action: actions, target: yj},session=session)
-                if want_time_tracking:
-                    end_time_gradient_decent = time.time()
-                    print("Time for gradient decent: " + str(end_time_gradient_decent - start_time_gradient_decent))
+
             current_state_snake=next_state_snake
             xt=xt1
             if want_time_tracking:
@@ -311,7 +285,7 @@ class MyAgent(object):
 
 
 def main():
-    snake = game.Snake(width=64, height=64)
+    snake = game.Snake(width=80, height=80)# DO NOT CHANGE SIZE!... network fails if you do...
 
     p = PLE(snake, fps=10, display_screen=True)
 
@@ -324,11 +298,12 @@ def main():
     explored = float(input[2]) / 10
     '''
     start_time = time.time()
-    session, input_l, output_l = myAgent.train(p, snake, nb_frames=5000000, gamma=0.5, explored=0.1, mini_batch_size=8)
+    session, input_l, output_l = myAgent.train(p, snake, time_sec=60*30, gamma=0.5
+                                               , explored=0.1,screen_size_x=80,screen_size_y=80)
+
+
+    learned_scores = myAgent.test( p, snake, time_sec=60, session=session, input_l=input_l, output_l=output_l)
     end_time = time.time()
-
-
-    learned_scores = myAgent.test( p, snake, 1000, session, input_l, output_l)
     result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     for elem in learned_scores:
         result[int(elem)] += 1
