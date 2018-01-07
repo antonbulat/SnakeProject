@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -54,9 +55,12 @@ public class ProteinMinHashingMapper extends Mapper<Object,Text,Text,IntWritable
 		
 		//init hash values
 		Random rm = new Random(42);
+		aList= new ArrayList<Integer>();
+		bList = new ArrayList<Integer>();
 		for(int k=0;k<hashNum;k++){
-			aList.set(k, rm.nextInt());
-			bList.set(k,rm.nextInt() );
+			
+			aList.add(rm.nextInt());
+			bList.add(rm.nextInt() );
 		}
 		
 		
