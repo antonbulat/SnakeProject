@@ -153,8 +153,8 @@ class MyAgent(object):
             return 1
         else:
             if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
-                return 0.7
-            return 0.2  # snake goes away from apple
+                return 0.0
+            return 0.0  # snake goes away from apple
 
     def foodIsNearer(self, state1, state2):
         if (abs(state1["snake_head_x"] - state1["food_x"]) + abs(state1["snake_head_y"] - state1["food_y"])
@@ -298,7 +298,7 @@ def main():
     explored = float(input[2]) / 10
     '''
     start_time = time.time()
-    session, input_l, output_l = myAgent.train(p, snake, time_sec=60*30, gamma=0.5
+    session, input_l, output_l = myAgent.train(p, snake, time_sec=60*3, gamma=0.5
                                                , explored=0.1,screen_size_x=80,screen_size_y=80)
 
 
