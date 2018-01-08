@@ -1,4 +1,5 @@
 package bigdata;
+
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.JavaRDD;
 
@@ -8,6 +9,7 @@ import java.util.Arrays;
 
 import org.apache.spark.SparkConf;
 
+// exercise (b)
 public class RelAlg {
 
 	public static void main(String[] args) {

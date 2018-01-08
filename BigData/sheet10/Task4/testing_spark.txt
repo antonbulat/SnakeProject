@@ -1,5 +1,0 @@
-1234	Graph	Polly	Big Data	WiSe15
-5678	Conda	Anna	Big Data	WiSe16
-9012	Jeego	Hugh	Big Data	WiSe16
-1234	Graph	Polly	Data Mining	WiSe16
-3456	Downe	Sid	Data Mining	WiSe16

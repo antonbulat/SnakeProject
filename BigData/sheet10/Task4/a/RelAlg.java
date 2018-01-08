@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import org.apache.spark.SparkConf;
 
+// exercise (a)
 public class RelAlg {
 
 	public static void main(String[] args) {
