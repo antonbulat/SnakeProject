@@ -6,6 +6,7 @@ import collections as col
 import numpy as num
 import time
 import cv2
+import pygame as pg
 
 # Tensorflow functions :
 # Set random values from a truncated normal distribution
@@ -147,8 +148,8 @@ class MyAgent(object):
         return scores
 
     def getSmartReward(self, current_state_snake, next_state_snake, reward, width, hight):
-        bonusRewardNearer = 0.2
-        bonusRewardFurther = 0.1
+        bonusRewardNearer = 0.1
+        bonusRewardFurther = 0.01
 
         if reward == -5:  # game over
             return 0
@@ -196,7 +197,7 @@ class MyAgent(object):
         #///////////////////////////////////////////////////////////
         # init replay memory as set
         replay_memory = col.deque(maxlen=100000)
-        nb_random_actions_at_begin = 1000
+        nb_random_actions_at_begin = 100
         current_state_snake = snake.getGameState()
 
         xt= p.getScreenGrayscale()
@@ -224,8 +225,13 @@ class MyAgent(object):
 
         # so now both deques have length 4... we could start learning
         t=0
-        while(time.time()-start_time<time_sec):
+        goon=True
+        while(time.time()-start_time<time_sec and goon):
             t+=1
+            events = pg.event.get()
+            for event in events:
+                if event.type == pg.KEYDOWN:
+                    goon=False
             if want_time_tracking:
                 start_time_training_frame = time.time()
             if p.game_over():
@@ -301,7 +307,7 @@ def main():
     explored = float(input[2]) / 10
     '''
     start_time = time.time()
-    session, input_l, output_l = myAgent.train(p, snake, time_sec=60*60, gamma=0.5
+    session, input_l, output_l = myAgent.train(p, snake, time_sec=60*60*24, gamma=0.5
                                                , explored=0.1,screen_size_x=80,screen_size_y=80)
 
 
