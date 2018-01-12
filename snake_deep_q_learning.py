@@ -146,15 +146,18 @@ class MyAgent(object):
 
         return scores
 
-    def getSmartReward(self, current_state_snake, next_state_snake, reward):
+    def getSmartReward(self, current_state_snake, next_state_snake, reward, width, hight):
+        bonusRewardNearer = 0.2
+        bonusRewardFurther = 0.1
+
         if reward == -5:  # game over
             return 0
         elif reward == 1:  # Snake found apple
             return 1
         else:
             if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
-                return 0.0
-            return 0.0  # snake goes away from apple
+                return bonusRewardNearer - (bonusRewardNearer * (width + hight))/ (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"]))
+            return bonusRewardFurther - (bonusRewardFurther * (width + hight))/ (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"]))  # snake goes away from apple
 
     def foodIsNearer(self, state1, state2):
         if (abs(state1["snake_head_x"] - state1["food_x"]) + abs(state1["snake_head_y"] - state1["food_y"])
@@ -237,7 +240,7 @@ class MyAgent(object):
                 #print("---",phi_t)
                 arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
                 action_index = num.argmax(arr)
-                print("training:",action_index,arr)
+                print("training:",action_index,arr, (time.time()-start_time))
             else:
                 action_index = random.randint(0,4)
 
@@ -249,7 +252,7 @@ class MyAgent(object):
             phi_t=phi_function(phi_t,xt)
             phi_tp1=phi_function(phi_tp1,xt1)
 
-            smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward)
+            smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward, 80.0, 80.0)
             replay_memory.append((phi_t,action_array,smart_reward,phi_tp1))
             # sample random minibatch of transitions from replay memory
             # test diffrent configurations
@@ -298,11 +301,11 @@ def main():
     explored = float(input[2]) / 10
     '''
     start_time = time.time()
-    session, input_l, output_l = myAgent.train(p, snake, time_sec=60*3, gamma=0.5
+    session, input_l, output_l = myAgent.train(p, snake, time_sec=60*60, gamma=0.5
                                                , explored=0.1,screen_size_x=80,screen_size_y=80)
 
 
-    learned_scores = myAgent.test( p, snake, time_sec=60, session=session, input_l=input_l, output_l=output_l)
+    learned_scores = myAgent.test( p, snake, time_sec=60*1, session=session, input_l=input_l, output_l=output_l)
     end_time = time.time()
     result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     for elem in learned_scores:

@@ -234,10 +234,10 @@ class Snake(PyGameWrapper):
 
         PyGameWrapper.__init__(self, width, height, actions=actions)
 
-        self.speed = percent_round_int(width, 0.9)#0,45
+        self.speed = percent_round_int(width, 0.45)#0,45
 
-        self.player_width = percent_round_int(width, 0.2)#0,05
-        self.food_width = percent_round_int(width, 0.1)#0,09
+        self.player_width = percent_round_int(width, 0.05)#0,05
+        self.food_width = percent_round_int(width, 0.09)#0,09
         self.player_color = (100, 255, 100)
         self.food_color = (255, 100, 100)
         # self.food_color = (0, 0, 0)
@@ -394,7 +394,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = Snake(width=128, height=128)
+    game = Snake(width=64, height=64)
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 32)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)
