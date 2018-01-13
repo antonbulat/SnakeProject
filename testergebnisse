@@ -1,0 +1,22 @@
+nach 30min
+310;91;11;3;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+TIME OF Q_LEARNING 1860.0803353786469
+
+nach 1h
+245;148;30;5;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+TIME OF Q_LEARNING 3660.1394329071045
+
+nach 1h (ohne Manhattan -> Stand 180111)
+141;9;2;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+TIME OF Q_LEARNING 3660.093574523926
+erst wie vorher in den Rand gelaufen, am Ende im loop
+
+nach 9h
+0;5;4;5;2;8;3;2;1;0;0;1;0;2;0;0;0;0;0;0;0;0;0;0;0;0
+TIME OF Q_LEARNING 32460.099219322205
+Bewegung leider nicht gesehen
+
+nach 6h
+11;76;50;33;25;12;11;2;6;4;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0
+TIME OF Q_LEARNING 21660.262789011
+siehe Video
