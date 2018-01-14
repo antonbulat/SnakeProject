@@ -7,6 +7,7 @@ import numpy as num
 import time
 import cv2
 import os
+import math
 import sys
 
 # Tensorflow functions :
@@ -147,16 +148,20 @@ class MyAgent(object):
             xt=p.getScreenGrayscale()
 
         return scores
-    '''
+
     def getSmartReward(self, current_state_snake, next_state_snake, reward):
         if reward == -5:  # game over
             return 0
         elif reward == 1:  # Snake found apple
             return 1
         else:
+            dis_to_apple=math.sqrt((next_state_snake["snake_head_x"] - next_state_snake["food_x"])*
+                                   (next_state_snake["snake_head_x"] - next_state_snake["food_x"])+
+                                   (next_state_snake["snake_head_y"] - next_state_snake["food_y"])*
+                                   (next_state_snake["snake_head_y"] - next_state_snake["food_y"]))
             if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
-                return 0.2
-            return 0.1  # snake goes away from apple
+                return 0.2*(1-dis_to_apple/114)
+            return 0.1*(1-dis_to_apple/114)  # snake goes away from apple
     '''
 
     def getSmartReward(self, current_state_snake, next_state_snake, reward, width=80.0, hight=80.0):
@@ -171,7 +176,7 @@ class MyAgent(object):
             if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
                 return bonusRewardNearer - (bonusRewardNearer * (width + hight))/ (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"]))
             return bonusRewardFurther - (bonusRewardFurther * (width + hight))/ (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"]))  # snake goes away from apple
-
+    '''
     def foodIsNearer(self, state1, state2):
         return (abs(state1["snake_head_x"] - state1["food_x"]) + abs(state1["snake_head_y"] - state1["food_y"])
                 > abs(state2["snake_head_x"] - state2["food_x"]) + abs(state2["snake_head_y"] - state2["food_y"]))
@@ -186,9 +191,8 @@ class MyAgent(object):
 
 
         # split the time in three parts...
-        split = time_sec // 3
-        time_random = split
-        time_rand_network = split * 2
+        time_random = time_sec // 6
+        time_rand_network = (time_sec // 6) * 3
         start_time = time.time()
         #want_print_information = True TODO noch nicht implementiert
 
@@ -294,7 +298,7 @@ class MyAgent(object):
 
                 if network_path:
                     # save checkpoints for later
-                    if t % 10000 == 0:
+                    if t % 5000 == 0:
                         saver.save(session, network_path + '/network', global_step=t)
                         print("save")
 
@@ -317,8 +321,8 @@ def main():
     #explored = float(input[1]) / 10
 
     start_time = time.time()
-    session, input_l, output_l = myAgent.train(p, snake,network_path="network_ant",time_sec=60*30, gamma=0.5
-                                               , explored=0.5,screen_size_x=80,screen_size_y=80,mini_batch_size=100)
+    session, input_l, output_l = myAgent.train(p, snake,network_path="network_",time_sec=60*60*6, gamma=0.5
+                                               , explored=0.85,screen_size_x=80,screen_size_y=80,mini_batch_size=100)
 
     print("testing...")
     learned_scores = myAgent.test( p, snake, time_sec=60*5, session=session, input_l=input_l, output_l=output_l)
