@@ -6,7 +6,8 @@ import collections as col
 import numpy as num
 import time
 import cv2
-import pygame as pg
+import os
+import sys
 
 # Tensorflow functions :
 # Set random values from a truncated normal distribution
@@ -47,7 +48,7 @@ def init_neural_network(screen_size_x, screen_size_y, nb_actions, nb_frames=4):
     W_conv3 = weight_variable([3, 3, 64, 64])
     b_conv3 = bias_variable([64])
 
-    W_feed_forward1 = weight_variable([256, 256])#TODO change to 64
+    W_feed_forward1 = weight_variable([256, 256])
     b_feed_forward1 = bias_variable([256])
     W_feed_forward2 = weight_variable([256, nb_actions])
     b_feed_forward2 = bias_variable([nb_actions])
@@ -94,21 +95,21 @@ class MyAgent(object):
         # actions -> "up": K_w, "left": K_a, "right": K_d, "down": K_s, "none": -
         return self.actionset[random.randint(0, 4)]
 
-    def test_random(self, p, snake, nb_frames_test):
+    def test_random(self, p, snake, time_sec):
+        start_time = time.time()
         scores = []
         p.init()
-        for f in range(nb_frames_test):
+        while (time.time() - start_time < time_sec):
             if p.game_over():
                 scores.append(snake.getScore() + 5)  # save the scores
                 p.reset_game()
             else:
                 max_action = self.pickRandomAction()  # take a random action
                 p.act(max_action)  # execute action
-            if nb_frames_test == f and not p.game_over():
-                scores.append(snake.getScore())
         return scores
 
     def test(self, p, snake, time_sec, session, input_l, output_l):
+
         start_time = time.time()
         scores = []
         p.init()
@@ -141,13 +142,24 @@ class MyAgent(object):
 
             phi_t = phi_function(phi_t, xt)
             action_index=num.argmax(session.run(output_l, feed_dict={input_l:[phi_t]})[0])#get index of best action
-            print("Action index: ",action_index,session.run(output_l,feed_dict={input_l:[phi_t]}))
+            #print("Action index: ",action_index,session.run(output_l,feed_dict={input_l:[phi_t]}))
             p.act(self.actionset[action_index])  # execute action
             xt=p.getScreenGrayscale()
 
         return scores
+    '''
+    def getSmartReward(self, current_state_snake, next_state_snake, reward):
+        if reward == -5:  # game over
+            return 0
+        elif reward == 1:  # Snake found apple
+            return 1
+        else:
+            if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
+                return 0.2
+            return 0.1  # snake goes away from apple
+    '''
 
-    def getSmartReward(self, current_state_snake, next_state_snake, reward, width, hight):
+    def getSmartReward(self, current_state_snake, next_state_snake, reward, width=80.0, hight=80.0):
         bonusRewardNearer = 0.1
         bonusRewardFurther = 0.01
 
@@ -161,22 +173,22 @@ class MyAgent(object):
             return bonusRewardFurther - (bonusRewardFurther * (width + hight))/ (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"]))  # snake goes away from apple
 
     def foodIsNearer(self, state1, state2):
-        if (abs(state1["snake_head_x"] - state1["food_x"]) + abs(state1["snake_head_y"] - state1["food_y"])
-                > abs(state2["snake_head_x"] - state2["food_x"]) + abs(state2["snake_head_y"] - state2["food_y"])):
-            if self.wantDebug:
-                print("Movement in right direction")
-            return True
-        else:
-            if self.wantDebug:
-                print("Movement in wrong direction")
-            return False
-
+        return (abs(state1["snake_head_x"] - state1["food_x"]) + abs(state1["snake_head_y"] - state1["food_y"])
+                > abs(state2["snake_head_x"] - state2["food_x"]) + abs(state2["snake_head_y"] - state2["food_y"]))
     #def generate_max_action(self):
     #    pass
     # deep Q-Leaning Algorithm
     # returns a trained neuronal network
-    def train(self, p, snake, time_sec, gamma, explored,
-              screen_size_x=64, screen_size_y=64,mini_batch_size=16,want_time_tracking = False):
+    def train(self, p, snake,network_path, time_sec, gamma, explored,
+              screen_size_x=64, screen_size_y=64,mini_batch_size=16
+              ,want_time_tracking = False):
+
+
+
+        # split the time in three parts...
+        split = time_sec // 3
+        time_random = split
+        time_rand_network = split * 2
         start_time = time.time()
         #want_print_information = True TODO noch nicht implementiert
 
@@ -195,9 +207,22 @@ class MyAgent(object):
         session.run(tf.global_variables_initializer())
 
         #///////////////////////////////////////////////////////////
+        #Restore checkpoints
+
+        if network_path:
+            if not os.path.exists(network_path):
+                os.mkdir(network_path)
+
+            saver = tf.train.Saver()
+            checkpoint = tf.train.get_checkpoint_state(network_path)
+
+            if checkpoint and checkpoint.model_checkpoint_path:
+                saver.restore(session, checkpoint.model_checkpoint_path)
+                print("Loaded checkpoints %s" % checkpoint.model_checkpoint_path)#TODO change string
+
+        #//////////////////////////////////////////////////////////////
         # init replay memory as set
         replay_memory = col.deque(maxlen=100000)
-        nb_random_actions_at_begin = 100
         current_state_snake = snake.getGameState()
 
         xt= p.getScreenGrayscale()
@@ -205,50 +230,34 @@ class MyAgent(object):
         # execute the first step for initialisation of phi t
         phi_t=init_phi_function(phi_t,xt)
 
-        action_index = random.randint(0, 4)#TODO reduce number of actions
+        action_index = random.randint(0, 4)
         p.act(self.actionset[action_index])
         xt = p.getScreenGrayscale()
-        '''
-        # execute the next 4 steps for initialisation of phi t and phi t+1
-        for i in range(0,4):
-            if p.game_over():
-                p.reset_game()# do not save end images
-                xt = p.getScreenGrayscale()
-            if i<3:# to have the elements shifted in the deques
-                phi_t=init_phi_function(phi_t,xt)
-            phi_tp1=init_phi_function(phi_tp1,xt)
-            action_index = random.randint(0, 4)
-            p.act(self.actionset[action_index])
-            xt = p.getScreenGrayscale()
-        '''
+
         phi_tp1 = phi_function(phi_t, xt)
 
         # so now both deques have length 4... we could start learning
         t=0
-        goon=True
-        while(time.time()-start_time<time_sec and goon):
+        while(time.time()-start_time<time_sec):
             t+=1
-            events = pg.event.get()
-            for event in events:
-                if event.type == pg.KEYDOWN:
-                    goon=False
-            if want_time_tracking:
-                start_time_training_frame = time.time()
             if p.game_over():
                 p.reset_game()
                 xt = p.getScreenGrayscale()
                 current_state_snake = snake.getGameState()
 
-
             action_array = num.zeros([nb_actions])
 
-            if (random.random() <= explored and t >= nb_random_actions_at_begin):
-                #print("---",phi_t)
-                arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
-                action_index = num.argmax(arr)
-                print("training:",action_index,arr, (time.time()-start_time))
+            if(time.time()-start_time<time_random):
+                action_index = random.randint(0, 4)
+            elif(time.time()-start_time<time_rand_network):
+                if (random.random() <= explored):
+                    arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
+                    action_index = num.argmax(arr)
+                else:
+                    action_index = random.randint(0,4)
             else:
-                action_index = random.randint(0,4)
+                arr = session.run(output_l, feed_dict={input_l: [phi_t]})[0]
+                action_index = num.argmax(arr)
 
             action_array[action_index] = 1
             reward = p.act(self.actionset[action_index])
@@ -258,7 +267,7 @@ class MyAgent(object):
             phi_t=phi_function(phi_t,xt)
             phi_tp1=phi_function(phi_tp1,xt1)
 
-            smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward, 80.0, 80.0)
+            smart_reward= self.getSmartReward(current_state_snake, next_state_snake, reward)
             replay_memory.append((phi_t,action_array,smart_reward,phi_tp1))
             # sample random minibatch of transitions from replay memory
             # test diffrent configurations
@@ -275,8 +284,6 @@ class MyAgent(object):
 
                 for j in range(0,mini_batch_size):
                     sequence=mini_batch[j]
-                    (aa,bb,cc,bb)=mini_batch[j]
-                    #print("sequence",sequence)# todo look at sequence
                     if sequence[2]==0:# if reward is 0 next state is terminal state
                         yj.append(sequence[2])
                     else:
@@ -285,40 +292,46 @@ class MyAgent(object):
 
                 train_operation.run(feed_dict={input_l: prev_states, action: actions, target: yj},session=session)
 
+                if network_path:
+                    # save checkpoints for later
+                    if t % 10000 == 0:
+                        saver.save(session, network_path + '/network', global_step=t)
+                        print("save")
+
             current_state_snake=next_state_snake
             xt=xt1
-            if want_time_tracking:
-                end_time_training_frame = time.time()
-                print("Time for frame number " + str(t) + " training: " + str(end_time_training_frame - start_time_training_frame) + "                                              " + str(t))
         return session,input_l,output_l
 
 
 def main():
     snake = game.Snake(width=80, height=80)# DO NOT CHANGE SIZE!... network fails if you do...
 
-    p = PLE(snake, fps=10, display_screen=True)
+    p = PLE(snake, fps=10, display_screen=False)
 
     myAgent = MyAgent(p.getActionSet(), False)
 
-    '''
-    input = sys.argv[1]
-    gamma = float(input[0]) / 10
-    learner = float(input[1]) / 10
-    explored = float(input[2]) / 10
-    '''
+
+    #input = sys.argv[1]
+    #gamma = float(input[0]) / 10
+    #learner = float(input[1]) / 10
+    #explored = float(input[1]) / 10
+
     start_time = time.time()
-    session, input_l, output_l = myAgent.train(p, snake, time_sec=60*60*24, gamma=0.5
-                                               , explored=0.1,screen_size_x=80,screen_size_y=80)
+    session, input_l, output_l = myAgent.train(p, snake,network_path="network_ant",time_sec=60*30, gamma=0.5
+                                               , explored=0.5,screen_size_x=80,screen_size_y=80,mini_batch_size=100)
 
-
-    learned_scores = myAgent.test( p, snake, time_sec=60*1, session=session, input_l=input_l, output_l=output_l)
+    print("testing...")
+    learned_scores = myAgent.test( p, snake, time_sec=60*5, session=session, input_l=input_l, output_l=output_l)
+    #learned_scores=myAgent.test_random(p,snake,time_sec=60*5)
     end_time = time.time()
-    result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0]
+    print("TIME OF Q_LEARNING", end_time - start_time)
     for elem in learned_scores:
         result[int(elem)] += 1
     for i in range(0,len(result)-1):
         print(result[i],end=";")
+
     print(result[len(result)-1])
-    print("TIME OF Q_LEARNING", end_time - start_time)
+
 
 if __name__ == '__main__': main()
