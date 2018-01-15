@@ -8,6 +8,7 @@ import time
 import cv2
 import os
 import math
+import pygame as pg
 import sys
 
 # Tensorflow functions :
@@ -160,7 +161,7 @@ class MyAgent(object):
                                    (next_state_snake["snake_head_y"] - next_state_snake["food_y"])*
                                    (next_state_snake["snake_head_y"] - next_state_snake["food_y"]))
             if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
-                return 0.2*(1-dis_to_apple/114)
+                return 0.5*(1-dis_to_apple/114)
             return 0.1*(1-dis_to_apple/114)  # snake goes away from apple
     '''
 
@@ -242,8 +243,14 @@ class MyAgent(object):
 
         # so now both deques have length 4... we could start learning
         t=0
-        while(time.time()-start_time<time_sec):
+        goon = True
+        while(time.time()-start_time<time_sec and goon):
             t+=1
+            events = pg.event.get()
+            for event in events:
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_SPACE:
+                        goon = False
             if p.game_over():
                 p.reset_game()
                 xt = p.getScreenGrayscale()
@@ -300,7 +307,7 @@ class MyAgent(object):
                     # save checkpoints for later
                     if t % 5000 == 0:
                         saver.save(session, network_path + '/network', global_step=t)
-                        print("save")
+                        print("Save at: "(time.time()-start_time))
 
             current_state_snake=next_state_snake
             xt=xt1
@@ -310,7 +317,7 @@ class MyAgent(object):
 def main():
     snake = game.Snake(width=80, height=80)# DO NOT CHANGE SIZE!... network fails if you do...
 
-    p = PLE(snake, fps=10, display_screen=False)
+    p = PLE(snake, fps=10, force_fps=True, display_screen=True) #Für Aufnahmen force_fps = False setzen
 
     myAgent = MyAgent(p.getActionSet(), False)
 
@@ -321,11 +328,11 @@ def main():
     #explored = float(input[1]) / 10
 
     start_time = time.time()
-    session, input_l, output_l = myAgent.train(p, snake,network_path="network_",time_sec=60*60*6, gamma=0.5
-                                               , explored=0.85,screen_size_x=80,screen_size_y=80,mini_batch_size=100)
+    session, input_l, output_l = myAgent.train(p, snake, network_path="network_", time_sec=60*1, gamma=0.5
+                                               , explored=0.1,screen_size_x=80,screen_size_y=80,mini_batch_size=20)
 
     print("testing...")
-    learned_scores = myAgent.test( p, snake, time_sec=60*5, session=session, input_l=input_l, output_l=output_l)
+    learned_scores = myAgent.test( p, snake, time_sec=60*1, session=session, input_l=input_l, output_l=output_l)
     #learned_scores=myAgent.test_random(p,snake,time_sec=60*5)
     end_time = time.time()
     result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0]

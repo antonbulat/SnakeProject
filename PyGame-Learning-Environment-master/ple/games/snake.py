@@ -236,8 +236,8 @@ class Snake(PyGameWrapper):
 
         self.speed = percent_round_int(width, 0.45)#0,45
 
-        self.player_width = percent_round_int(width, 0.05)#0,05
-        self.food_width = percent_round_int(width, 0.09)#0,09
+        self.player_width = percent_round_int(width, 0.1)#0,05
+        self.food_width = percent_round_int(width, 0.18)#0,09
         self.player_color = (100, 255, 100)
         self.food_color = (255, 100, 100)
         # self.food_color = (0, 0, 0)
