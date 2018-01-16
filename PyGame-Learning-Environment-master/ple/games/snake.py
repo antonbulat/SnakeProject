@@ -44,11 +44,11 @@ class Food(pygame.sprite.Sprite):
 
         while (new_pos in snake_body):
             _x = self.rng.choice(range(
-                self.width * 2, self.SCREEN_WIDTH - self.width * 2, self.width
+                self.width * 2, self.SCREEN_WIDTH - self.width * 2, self.width #Original: self.width * 2, self.SCREEN_WIDTH - self.width * 2, self.width
             ))
 
             _y = self.rng.choice(range(
-                self.width * 2, self.SCREEN_HEIGHT - self.width * 2, self.width
+                self.width * 2, self.SCREEN_HEIGHT - self.width * 2, self.width #Original: self.width * 2, self.SCREEN_HEIGHT - self.width * 2, self.width
             ))
 
             new_pos = vec2d((_x, _y))
