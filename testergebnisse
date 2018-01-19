@@ -25,3 +25,13 @@ nach 10h
 0;651;506;1098;1761;1318;972;646;494;317;212;131;77;46;31;10;7;5;2;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
 TIME OF Q_LEARNING 36302.064661026
 (Size +100%, Reward linear 0.5 und 0.2, Minibatch 100, Exploid 0.3)
+
+TIME OF Q_LEARNING TRAINING:  3602.8357059955597
+849;1577;1273;692;321;146;60;23;8;2;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+training time: 3602.8357059955597 ; testing time: 300 ; learning rate: 0.5 ;exploration rate: 0.3 ; batch size: 20 ; positiv reward: 0.5 ; negativ reward: 0.1 ;
+Apfel mindestens 1 von den Gerenzen entfernt
+
+TIME OF Q_LEARNING TRAINING:  36001.584067583084
+0;265;355;405;381;269;263;201;171;150;127;98;70;61;53;41;21;22;15;2;4;2;0;3;1;0;0;0;0;0;0;0;0;0;0;0;0;0
+training time: 36001 ; testing time: 300 ; learning rate: 0.5 ; exploration rate: 0.3 ; batch size: 100 ; positiv reward: 0.5 ; negativ reward: 0.1 ;
+Apfel mindestens 1 von den Gerenzen entfernt

@@ -165,19 +165,16 @@ class MyAgent(object):
             return maxNegReward*(1-dis_to_apple/114)  # snake goes away from apple
     '''
 
-    def getSmartReward(self, current_state_snake, next_state_snake, reward, width=80.0, hight=80.0):
-        bonusRewardNearer = 0.1
-        bonusRewardFurther = 0.01
-
+    def getSmartReward(self, current_state_snake, next_state_snake, reward, maxPosReward, maxNegReward):
         if reward == -5:  # game over
             return 0
         elif reward == 1:  # Snake found apple
             return 1
         else:
             if self.foodIsNearer(current_state_snake, next_state_snake):  # snake goes to apple
-                return bonusRewardNearer - (bonusRewardNearer * (width + hight))/ (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"]))
-            return bonusRewardFurther - (bonusRewardFurther * (width + hight))/ (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"]))  # snake goes away from apple
-    '''
+                return maxPosReward * (1 - 1 / (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"])))
+            return maxNegReward * (1 - (width + hight))/ (abs(next_state_snake["snake_head_x"] - next_state_snake["food_x"]) + abs(next_state_snake["snake_head_y"] - next_state_snake["food_y"]))  # snake goes away from apple
+'''
     def foodIsNearer(self, state1, state2):
         return (abs(state1["snake_head_x"] - state1["food_x"]) + abs(state1["snake_head_y"] - state1["food_y"])
                 > abs(state2["snake_head_x"] - state2["food_x"]) + abs(state2["snake_head_y"] - state2["food_y"]))
@@ -344,16 +341,16 @@ def main():
     loadNetwork=False           #Bei True wird das Netzwerk aus dem unten angegebenen Pfad geladen
     saveNetwork=False           #Bei True wird das Netzwerk in dem unten angegebenen Pfad gespeichert
     networkPath="network_"      #Pfad, in dem bzw. von dem das Netzwerk gespeichert bzw. geladen wird
-    trainingTime=60*10          #Gesamtzeit die verwendet wird, um das Neuronale Netzwerk zu trainieren
+    trainingTime=60*60*10       #Gesamtzeit die verwendet wird, um das Neuronale Netzwerk zu trainieren
                                 #(nur Zufall / Zufall und Netzwerk / nur Netzwerk)
-    testingTime=60*1            #Zeit, um das antrainierte Neuronale Netzwerk zu testen (Default = 5 min)
+    testingTime=60*5            #Zeit, um das antrainierte Neuronale Netzwerk zu testen (Default = 5 min)
     constantRandomTime=False    #Zu Beginn des Trainings wird die Schlange zufällig gesteuert. Wird der Wert hier auf
                                 #True gesetzt, so ist die Anzahl der zufälligen Aktionen zu Beginn fest, sonst beträgt
                                 #diese ein Drittel der Trainingszeit
     randomizedFrames=10000      #Anzahl der zu Beginn ausgeführten Zufallsaktionen, wenn dieser Wert konstant sein soll
     gamma=0.5                   #Lernrate, die das erlernen neuer Erkenntnisse beeinflusst
     explored=0.3                #Zufallsrate, die die Wahl einer Zufälligen Aktion der Schlange beeinflusst
-    miniBatchSize=20            #Anzahl der Zustände, die aus der Vergangenheit betrachtet werden
+    miniBatchSize=100           #Anzahl der Zustände, die aus der Vergangenheit betrachtet werden
     maxPosReward=0.5            #Die maximale Belohnung, wenn die Schlange sich zum Apfel bewegt
     maxNegReward=0.1            #Die maximale Belohnung, wenn die Schlange sich weg vom Apfel bewegt
 
@@ -391,8 +388,8 @@ def main():
         print(result[i],end=";")
 
     print(result[len(result)-1])
-    print("training time:",startTestingTime-endTestingTime,"; testing time:",testingTime,
-          "; learning rate:",gamma,";exploration rate:",explored,"; batch size:",miniBatchSize,
+    print("training time:",int(endTestingTime-startTestingTime),"; testing time:",testingTime,
+          "; learning rate:",gamma,"; exploration rate:",explored,"; batch size:",miniBatchSize,
           "; positiv reward:",maxPosReward,"; negativ reward:",maxNegReward,";")
 
 
