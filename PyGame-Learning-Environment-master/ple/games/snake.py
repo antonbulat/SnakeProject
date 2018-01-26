@@ -44,11 +44,11 @@ class Food(pygame.sprite.Sprite):
 
         while (new_pos in snake_body):
             _x = self.rng.choice(range(
-                self.width * 2, self.SCREEN_WIDTH - self.width * 2, self.width #Original: self.width * 2, self.SCREEN_WIDTH - self.width * 2, self.width
+                self.width * 2, self.SCREEN_WIDTH - self.width * 2, self.width
             ))
 
             _y = self.rng.choice(range(
-                self.width * 2, self.SCREEN_HEIGHT - self.width * 2, self.width #Original: self.width * 2, self.SCREEN_HEIGHT - self.width * 2, self.width
+                self.width * 2, self.SCREEN_HEIGHT - self.width * 2, self.width
             ))
 
             new_pos = vec2d((_x, _y))
@@ -234,14 +234,12 @@ class Snake(PyGameWrapper):
 
         PyGameWrapper.__init__(self, width, height, actions=actions)
 
-        self.speed = percent_round_int(width, 0.45)#0,45
+        self.speed = percent_round_int(width, 0.45)
 
-        self.player_width = percent_round_int(width, 0.1)#0,05
-        self.food_width = percent_round_int(width, 0.18)#0,09
+        self.player_width = percent_round_int(width, 0.1)#0.05
+        self.food_width = percent_round_int(width, 0.18)#0.09
         self.player_color = (100, 255, 100)
         self.food_color = (255, 100, 100)
-        # self.food_color = (0, 0, 0)
-
 
         self.INIT_POS = (width / 2, height / 2)
         self.init_length = init_length
@@ -345,6 +343,12 @@ class Snake(PyGameWrapper):
         self.ticks = 0
         self.lives = 1
 
+        self.fixed_score=0
+
+    #change by Julia .... just call after game over!!!!
+    def get_fixed_score(self):
+        return self.fixed_score
+
     def step(self, dt):
         """
             Perform one step of game emulation.
@@ -354,11 +358,13 @@ class Snake(PyGameWrapper):
         self.ticks += 1
         self.screen.fill(self.BG_COLOR)
         self._handle_player_events()
+        #print("do nothing",self.score,self.rewards["tick"])
         self.score += self.rewards["tick"]
 
         hit = pygame.sprite.collide_rect(self.player.head, self.food)
         if hit:  # it hit
             self.score += self.rewards["positive"]
+            #print("positive", self.score, self.rewards["positive"])
             self.player.grow()
             self.food.new_position(self.player)
 
@@ -383,6 +389,12 @@ class Snake(PyGameWrapper):
 
         if self.lives <= 0.0:
             self.score += self.rewards["loss"]
+            #-----------------------------------------
+            #this part is changed by Julia... to fix the score function
+            self.fixed_score= self.score
+            #print("loss", self.score, self.rewards["loss"])
+            self.score=0
+            #------------------------------------------
 
         self.player.update(dt)
 
@@ -394,7 +406,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = Snake(width=64, height=64)
+    game = Snake(width=128, height=128)
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 32)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)

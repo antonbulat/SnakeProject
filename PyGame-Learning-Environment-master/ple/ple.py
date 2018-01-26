@@ -121,7 +121,7 @@ class PLE(object):
 
             # some pygame games preload the images
             # to speed resetting and inits up.
-            pygame.display.set_mode((1, 1), pygame.NOFRAME)
+            #pygame.display.set_mode((1, 1), pygame.NOFRAME) ATTENTION I chaged this!!!!!TODO
         else:
             # in order to use doom, install following https://github.com/openai/doom-py
             from .games.base.doomwrapper import DoomWrapper
@@ -391,13 +391,19 @@ class PLE(object):
             action = self.NOOP
 
         self._setAction(action)
-        for i in range(self.num_steps):
+        #-----------------------------------------------------------------
+        #this part is changed by Julia ... fix the game score
+        i=0
+        while(i<self.num_steps and not self.game.game_over()):
+        #for i in range(self.num_steps):
             time_elapsed = self._tick()
             self.game.step(time_elapsed)
             self._draw_frame()
+            i+=1
 
-        self.frame_count += self.num_steps
-
+        self.frame_count += i
+        #self.frame_count += self.num_steps
+        #-----------------------------------------------------------------
         return self._getReward()
 
     def _setAction(self, action):

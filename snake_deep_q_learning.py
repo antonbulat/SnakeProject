@@ -103,7 +103,7 @@ class MyAgent(object):
         p.init()
         while (time.time() - start_time < time_sec):
             if p.game_over():
-                scores.append(snake.getScore() + 5)  # save the scores
+                scores.append(snake.get_fixed_score() + 5)  # save the scores
                 p.reset_game()
             else:
                 max_action = self.pickRandomAction()  # take a random action
@@ -138,7 +138,7 @@ class MyAgent(object):
         # so now both deques have length 4... we could start training
         while(time.time()-start_time<time_sec):
             if p.game_over():
-                scores.append(snake.getScore() + 5)  # save the scores
+                scores.append(snake.get_fixed_score() + 5)  # save the scores
                 p.reset_game()
                 xt = p.getScreenGrayscale()
 
