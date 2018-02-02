@@ -185,9 +185,10 @@ class MyAgent(object):
     def train(self, p, snake, loadNetwork, saveNetwork, network_path, time_sec,constantRandomizedTime, randomizedFrames,
               gamma,explored,screen_size_x=80,screen_size_y=80,mini_batch_size=16,maxPosReward=0.5,maxNegReward=0.1):
 
-        # split the time in 1/6 random; 1/2 random and network; 2/6 network;
-        time_random = time_sec // 6
-        time_rand_network = (time_sec // 6) * 3
+        # split the time in three parts...
+        time_random = 60 * 30                   # 0,5 h fast komplett Random
+        time_rand_network = (time_sec // 6) * 4 # 2/3 der Zeit minus 1h expored Network
+                                                # Rest der Zeit semi Network (Fast nur Netzwerk)
         start_time = time.time()
 
         # init game
@@ -220,7 +221,7 @@ class MyAgent(object):
 
         #//////////////////////////////////////////////////////////////
         # init replay memory as set
-        replay_memory = col.deque(maxlen=100000)
+        replay_memory = col.deque(maxlen=500000)
         current_state_snake = snake.getGameState()
 
         xt= p.getScreenGrayscale()
@@ -238,6 +239,13 @@ class MyAgent(object):
         t=0
         goon = True
         progress = 0
+        result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0]
+        learned_scores = []
+        timer_tmp = 1
+        learning_results = open('learning_results_small_new.txt', 'w+')
+        tmp_scores = col.deque(maxlen=200)
         print("Training wurde zu ", progress, "% absolviert")
         while(time.time()-start_time<time_sec and goon):
             t+=1
@@ -247,6 +255,9 @@ class MyAgent(object):
                     if event.key == pg.K_SPACE:
                         goon = False
             if p.game_over():
+                tmp_scores.append(snake.get_fixed_score() + 5)
+                if time.time() - start_time > (time_sec - 60 * 60):  #
+                    learned_scores.append(snake.get_fixed_score() + 5)  # save the scores
                 p.reset_game()
                 xt = p.getScreenGrayscale()
                 current_state_snake = snake.getGameState()
@@ -254,9 +265,17 @@ class MyAgent(object):
             action_array = num.zeros([nb_actions])
 
             if(time.time()-start_time<time_random and not constantRandomizedTime ): #TODO: Muss evtl. komplett auf eine Konstante umgestellt werden.
-                action_index = random.randint(0, 4)
+                if (random.random() <= 0.1):
+                    arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
+                    action_index = num.argmax(arr)
+                else:
+                    action_index = random.randint(0,4)
             elif(constantRandomizedTime and t<randomizedFrames):
-                action_index = random.randint(0, 4)
+                if (random.random() <= 0.1):
+                    arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
+                    action_index = num.argmax(arr)
+                else:
+                    action_index = random.randint(0,4)
             elif(time.time()-start_time<time_rand_network):
                 if (random.random() <= explored):
                     arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
@@ -264,8 +283,21 @@ class MyAgent(object):
                 else:
                     action_index = random.randint(0,4)
             else:
-                arr = session.run(output_l, feed_dict={input_l: [phi_t]})[0]
-                action_index = num.argmax(arr)
+                if (random.random() <= 0.95):
+                    arr=session.run(output_l,feed_dict={input_l:[phi_t]})[0]
+                    action_index = num.argmax(arr)
+                else:
+                    action_index = random.randint(0,4)
+
+            #Resultate abspeichern
+            if time.time()-start_time > 60*4*timer_tmp:
+                myres=""
+                for i in range(len(tmp_scores)-1):
+                    myres+=str(tmp_scores[i])+","
+                myres+=str(tmp_scores[len(tmp_scores)-1])+";"+str(timer_tmp)+"\n"
+                learning_results.write(myres)
+                learning_results.flush()
+                timer_tmp+=1
 
             action_array[action_index] = 1
             reward = p.act(self.actionset[action_index])
@@ -312,7 +344,18 @@ class MyAgent(object):
                 if (progress!=int(round(100*(time.time()-start_time)/time_sec))):
                     progress = int(round(100*(time.time()-start_time)/time_sec))
                     print("Training wurde zu ",progress,"% absolviert")
-        return session,input_l,output_l
+
+        for elem in learned_scores:
+            result[int(elem)] += 1
+        print("Result of training:")
+        for i in range(0, len(result) - 1):
+            print(result[i], end=";")
+
+        print(result[len(result) - 1])
+        print()
+        learning_results.close()
+
+        return session, input_l, output_l
 
 
 def main():
@@ -332,8 +375,9 @@ def main():
     #Geschwindigkeit der Schlange, Größe und Positionirungseinschränkung des Apfels, die Farben der Objekte und des
     #Hintergrunds, und vieles mehr. Aktuell (16.01.18) wird die Klasse Schlange lockal mit unterschiedlichen Versionen
     #genutzt. Um zu vergleichbaren Ergebnissen zu kommen wird sich auf folgende Werte in der Snake Klasse geeinigt:
-    #self.speed=0.45; player_width=0.1; food_width=0.18; Faktor für den Abstand vom Apfel zum Spielfeldrand = 2;
-    #player_color=(100,255,100); food_color=(255,100,100); BG_COLOR=(25, 25, 25)
+    #self.speed=0.45; player_width=0.05; food_width=0.09; Faktor für den Abstand vom Apfel zum Spielfeldrand = 2;
+    #player_color=(100,255,100); food_color=(255,100,100); BG_COLOR=(25, 25, 25). Sondersituation Stand 2.2.18 Schlage
+    #wächst nicht!
 
     ###Training###
     wantDebug=False             #Für das anzeigen von Details der einzelnen Variablen wärend der Berechnungen,
@@ -349,9 +393,9 @@ def main():
                                 #diese ein Drittel der Trainingszeit
     randomizedFrames=10000      #Anzahl der zu Beginn ausgeführten Zufallsaktionen, wenn dieser Wert konstant sein soll
     gamma=0.5                   #Lernrate, die das erlernen neuer Erkenntnisse beeinflusst
-    explored=0.3                #Zufallsrate, die die Wahl einer Zufälligen Aktion der Schlange beeinflusst
-    miniBatchSize=100           #Anzahl der Zustände, die aus der Vergangenheit betrachtet werden
-    maxPosReward=0.5            #Die maximale Belohnung, wenn die Schlange sich zum Apfel bewegt
+    explored=0.75               #Zufallsrate, die die Wahl einer Zufälligen Aktion der Schlange beeinflusst
+    miniBatchSize=200           #Anzahl der Zustände, die aus der Vergangenheit betrachtet werden
+    maxPosReward=0.8            #Die maximale Belohnung, wenn die Schlange sich zum Apfel bewegt
     maxNegReward=0.1            #Die maximale Belohnung, wenn die Schlange sich weg vom Apfel bewegt
 
 
@@ -359,7 +403,7 @@ def main():
 
     snake = game.Snake(width=width, height=height)# DO NOT CHANGE SIZE!... network fails if you do...Should be 80x80!
 
-    p = PLE(snake, fps=10, force_fps=fastTesting, display_screen=displayScreen) #Für Aufnahmen force_fps = False setzen
+    p = PLE(snake, fps=30, force_fps=fastTesting, display_screen=displayScreen) #Für Aufnahmen force_fps = False setzen
 
     myAgent = MyAgent(p.getActionSet(), wantDebug)
 
@@ -369,14 +413,14 @@ def main():
     #learner = float(input[1]) / 10
     #explored = float(input[1]) / 10
 
-    startTestingTime = time.time()
+    startTrainingTime = time.time()
     session, input_l, output_l = myAgent.train(p,snake,loadNetwork,saveNetwork,networkPath,trainingTime,
                                                constantRandomTime, randomizedFrames,
                                                gamma,explored,screen_size_x=80,screen_size_y=80,
                                                mini_batch_size=miniBatchSize,maxPosReward=maxPosReward,
                                                maxNegReward=maxNegReward)
-    endTestingTime = time.time()
-    print("TIME OF Q_LEARNING TRAINING: ", endTestingTime - startTestingTime)
+    endTrainingTime = time.time()
+    print("TIME OF Q_LEARNING TRAINING: ", endTrainingTime - startTrainingTime)
     print("testing...")
     learned_scores = myAgent.test( p, snake, time_sec=testingTime, session=session, input_l=input_l, output_l=output_l)
     #learned_scores=myAgent.test_random(p,snake,time_sec=60*5)
@@ -388,7 +432,7 @@ def main():
         print(result[i],end=";")
 
     print(result[len(result)-1])
-    print("training time:",int(endTestingTime-startTestingTime),"; testing time:",testingTime,
+    print("training time:",int(endTrainingTime-startTrainingTime),"; testing time:",testingTime,
           "; learning rate:",gamma,"; exploration rate:",explored,"; batch size:",miniBatchSize,
           "; positiv reward:",maxPosReward,"; negativ reward:",maxNegReward,";")
 
